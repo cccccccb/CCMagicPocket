@@ -1,0 +1,7 @@
+*.pro.user*
+CMakeLists.txt.user
+
+build/*
+
+.vs/
+.vscode/

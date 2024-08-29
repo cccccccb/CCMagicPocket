@@ -1,0 +1,3 @@
+[submodule "modules/CCQuickStartup"]
+	path = modules/CCQuickStartup
+	url = https://github.com/cccccccb/CCQuickStartup.git

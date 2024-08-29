@@ -1,0 +1,4 @@
+module CCMagicPocket
+linktarget MPControlExtension
+plugin MPControlExtension
+classname MPControlExtension
