@@ -10,7 +10,7 @@ Rectangle {
     id: navigationRoot
     radius: 8
 
-    property Item backgroundItem
+    property Item blurBackground
 
     clip: true
     color: "transparent"
@@ -20,11 +20,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 60
         slideOn: root.populate && !leftControlBar.visible
-        backgroundItem: navigationRoot.backgroundItem
-
-        Component.onCompleted: {
-            Window.window.Frameless.moveUnder.push(this)
-        }
+        blurBackground: navigationRoot.blurBackground
     }
 
     ActivityDocker {
@@ -32,7 +28,7 @@ Rectangle {
 
         anchors.horizontalCenter: parent.horizontalCenter
         slideOn: root.populate && !leftControlBar.visible
-        backgroundItem: navigationRoot.backgroundItem
+        blurBackground: navigationRoot.blurBackground
     }
 
     NavigationPopup {
@@ -41,13 +37,13 @@ Rectangle {
         height: parent.height - 40
 
         visible: populate
-        backgroundItem: navigationRoot.backgroundItem
+        blurBackground: navigationRoot.blurBackground
     }
 
     SlidePopupButton {
         id: slideButton
         slideOn: (populate && !leftControlBar.visible) || slideHoverEnter
-        backgroundItem: navigationRoot.backgroundItem
+        blurBackground: navigationRoot.blurBackground
 
         property bool slideHoverEnter: false
         onClicked: {

@@ -11,7 +11,7 @@ CustomButton {
     id: root
 
     property bool slideOn: false
-    property Item backgroundItem
+    property Item blurBackground
 
     implicitWidth: 40
     implicitHeight: 40
@@ -21,7 +21,7 @@ CustomButton {
     display: Button.IconOnly
     icon.name: "slide-out"
     Material.elevation: 0
-    Material.foreground: Material.accent
+    Material.foreground: Qt.lighter(Material.accentColor)
 
     state: "NONSLIDEON"
     states: [
@@ -56,6 +56,7 @@ CustomButton {
                 PropertyAnimation {
                     target: root
                     properties: "opacity,x"
+                    easing.type: Easing.OutQuint
                 }
             }
         },
@@ -66,6 +67,7 @@ CustomButton {
             PropertyAnimation {
                 target: root
                 properties: "opacity,x"
+                easing.type: Easing.InQuint
             }
         }
     ]
@@ -95,7 +97,7 @@ CustomButton {
 
         BlurBackground {
             anchors.fill: parent
-            backgroundItem: root.backgroundItem
+            blurBackground: root.blurBackground
             radius: root.width / 2
         }
     }

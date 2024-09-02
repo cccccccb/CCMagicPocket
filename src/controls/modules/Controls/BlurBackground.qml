@@ -5,7 +5,7 @@ import "../Utils/functional.js" as Functional
 
 Item {
     id: root
-    property Item backgroundItem
+    property Item blurBackground
     property real radius: 0
 
     function scheduleUpdateOnInterval() {
@@ -16,7 +16,7 @@ Item {
     }
 
     Instantiator {
-        readonly property Item _parentBackground: Functional.commonParent(root, backgroundItem)
+        readonly property Item _parentBackground: Functional.commonParent(root, blurBackground)
         model: Functional.parentsTo(root, _parentBackground)
 
         Connections {
@@ -43,9 +43,9 @@ Item {
     ShaderEffectSource {
         id: effectSource
         anchors.fill: parent
-        sourceItem: backgroundItem
+        sourceItem: blurBackground
         recursive: false
-        live: false
+        live: true
         visible: false
     }
 
@@ -84,7 +84,7 @@ Item {
         repeat: false
 
         onTriggered: {
-            var rect = Functional.mapToTarget(root, backgroundItem, Qt.rect(root.x, root.y, root.width, root.height))
+            var rect = Functional.mapToTarget(root, blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
             if (rect.x < 0)
                 rect.x = 0
 

@@ -16,7 +16,7 @@ public:
     ~MPPreload();
 
     void aboutToPreload(QQmlApplicationEngine *engine);
-    QUrl preloadComponentPath() const;
+    QUrl preloadModulePath() const;
 };
 
 #endif // MPPRELOAD_H

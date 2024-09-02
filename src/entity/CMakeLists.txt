@@ -9,7 +9,7 @@ target_sources(MagicPocket-DesktopEntity
 
 set_target_properties(MagicPocket-DesktopEntity
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugins
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules
 )
 
 target_include_directories(MagicPocket-DesktopEntity PRIVATE

@@ -9,13 +9,13 @@
 
 static QStringList buildinPluginPaths()
 {
-    QStringList result = { QLibraryInfo::path(QLibraryInfo::DataPath) + "/plugins" };
-    const auto ccPluginPath = qgetenv("MP_QML_PLUGIN_PATH");
+    QStringList result = { QLibraryInfo::path(QLibraryInfo::DataPath) + "/modules" };
+    const auto ccPluginPath = qgetenv("MP_QML_MODULE_PATH");
     if (!ccPluginPath.isEmpty())
         result.append(ccPluginPath);
 
-#ifdef MP_QML_PLUGIN_PATH
-    result.append(MP_QML_PLUGIN_PATH);
+#ifdef MP_QML_MODULE_PATH
+    result.append(MP_QML_MODULE_PATH);
 #endif
 
     return result;
@@ -32,7 +32,7 @@ MPPreload::~MPPreload()
 
 void MPPreload::aboutToPreload(QQmlApplicationEngine *engine)
 {
-    qGuiApp->setApplicationName("MagicPocket");
+    qGuiApp->setApplicationName("Magic Pocket");
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     if (!format.hasAlpha() || format.alphaBufferSize() != 8) {
         format.setAlphaBufferSize(8);
@@ -46,7 +46,7 @@ void MPPreload::aboutToPreload(QQmlApplicationEngine *engine)
     }
 }
 
-QUrl MPPreload::preloadComponentPath() const
+QUrl MPPreload::preloadModulePath() const
 {
     return QUrl("qrc:///qml/PreloadWindow.qml");
 }

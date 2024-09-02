@@ -14,7 +14,7 @@ MPEntity::~MPEntity()
 
 }
 
-QUrl MPEntity::entityComponentPath() const
+QUrl MPEntity::entityModulePath() const
 {
     return QUrl("qrc:///src/MainWindow.qml");
 }

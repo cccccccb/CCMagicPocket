@@ -17,7 +17,7 @@ public:
     explicit MPEntity(QObject *parent = nullptr);
     ~MPEntity();
 
-    QUrl entityComponentPath() const;
+    QUrl entityModulePath() const;
     void initialize(QQmlApplicationEngine *engine);
 };
 

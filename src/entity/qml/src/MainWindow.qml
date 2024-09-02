@@ -12,7 +12,9 @@ import "title"
 AppStartupItem {
     id: root
 
-    Component {
+    AppStartupComponent {
+        id: mainPaneComp
+
         MainPane {
             id: mainPane
             z: -100
@@ -27,11 +29,13 @@ AppStartupItem {
         }
     }
 
-    Component {
+    AppStartupComponent {
+        depends: mainPaneComp
+
         NavigationBarGroup {
             anchors.fill: parent
             anchors.margins: AppStartupItem.mainPane.anchors.margins
-            backgroundItem: AppStartupItem.mainPane
+            blurBackground: AppStartupItem.mainPane
         }
     }
 

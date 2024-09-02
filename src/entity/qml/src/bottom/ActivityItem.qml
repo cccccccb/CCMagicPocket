@@ -44,7 +44,7 @@ Control {
             shadowEnabled: true
             shadowColor: Qt.color("#A0000000")
             shadowBlur: 0.8
-            shadowOpacity: 0.6
+            shadowOpacity: 0.4
             shadowVerticalOffset: 4
         }
 

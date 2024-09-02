@@ -8,13 +8,13 @@ import CCMagicPocket
 Control {
     id: root
     property bool slideOn: false
-    property alias backgroundItem: blurBack.backgroundItem
+    property alias blurBackground: blurBack.blurBackground
 
     leftPadding: 10
     rightPadding: 10
-    topInset: 10
+    bottomPadding: 10
+    topInset: 20
     bottomInset: 10
-    implicitHeight: 44
 
     background: Item {
         opacity: 0.8
@@ -42,72 +42,90 @@ Control {
         BlurBackground {
             id: blurBack
             anchors.fill: parent
+
             radius: 8
+        }
+
+        Component.onCompleted: {
+            Window.window.Frameless.moveUnder.push(this)
         }
     }
 
     contentItem: Item {
-        Image {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            source: "qrc:/svg/icon-circle.svg"
-            sourceSize: Qt.size(18, 18)
-            smooth: true
-        }
-
-        Row {
-            id: timerItem
-            anchors.centerIn: parent
-            spacing: 4
-
-            Text {
-                font.bold: true
-                font.pointSize: Style.item.fontSize.t3
-                color: Style.item.hightTextColor
-
-                Timer {
-                    repeat: true
-                    interval: 500
-                    running: true
-
-                    onTriggered: parent.text =  Qt.formatDateTime(new Date(), "MMM-dd")
-                }
-            }
-
-
-            Text {
-                font.bold: true
-                font.pointSize: Style.item.fontSize.t3
-                color: Style.item.hightTextColor
-
-                Timer {
-                    repeat: true
-                    interval: 500
-                    running: true
-
-                    onTriggered: parent.text =  Qt.formatDateTime(new Date(), "hh:mm")
-                }
-            }
-        }
+        implicitHeight: statusBlock.implicitHeight + realTitleItem.implicitHeight
 
         StatusBlock {
             id: statusBlock
-            activateOn: slideOn
 
-            width: timerItem.width + 10
-            anchors.bottom: parent.top
+            implicitWidth: 50
+            implicitHeight: 20
+            anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        CustomButton {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            display: Button.IconOnly
-            icon.name: "notification"
-            icon.width: 18
-            icon.height: 18
-            icon.color: Style.item.hightTextColor
-            background: null
+        Item {
+            id: realTitleItem
+            width: parent.width
+            implicitHeight: 24
+            anchors.top: statusBlock.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            Image {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/svg/icon-circle.svg"
+                sourceSize: Qt.size(18, 18)
+                smooth: true
+            }
+
+            Row {
+                id: timerItem
+                anchors.centerIn: parent
+                spacing: 4
+
+                Text {
+                    font.bold: true
+                    font.pointSize: Style.item.fontSize.t3
+                    color: Style.item.hightTextColor
+
+                    Timer {
+                        repeat: true
+                        interval: 500
+                        running: true
+
+                        onTriggered: parent.text =  Qt.formatDateTime(new Date(), "MMM-dd")
+                    }
+                }
+
+                Text {
+                    font.bold: true
+                    font.pointSize: Style.item.fontSize.t3
+                    color: Style.item.hightTextColor
+
+                    Timer {
+                        repeat: true
+                        interval: 500
+                        running: true
+
+                        onTriggered: parent.text =  Qt.formatDateTime(new Date(), "hh:mm")
+                    }
+                }
+            }
+
+            CustomButton {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                display: Button.IconOnly
+                icon.name: "notification"
+                icon.width: 18
+                icon.height: 18
+                icon.color: Style.item.hightTextColor
+                background: null
+
+                Component.onCompleted: {
+                    Window.window.Frameless.moveExclude.push(this)
+                }
+            }
         }
     }
 
@@ -119,7 +137,7 @@ Control {
             PropertyChanges {
                 target: root
                 opacity: 1.0
-                y: 10
+                y: 0
             }
             PropertyChanges {
                 target: statusBlock

@@ -8,7 +8,7 @@ import CCMagicPocket
 Popup {
     id: root
 
-    property alias backgroundItem: blurBack.backgroundItem
+    property alias blurBackground: blurBack.blurBackground
 
     padding: 0
     implicitWidth: background.implicitWidth

@@ -8,7 +8,7 @@ import CCMagicPocket
 Control {
     id: root
     property bool slideOn: false
-    property alias backgroundItem: blurBack.backgroundItem
+    property alias blurBackground: blurBack.blurBackground
     property alias permanentModel: permanentView.model
     property alias activeModel: activeView.model
 
