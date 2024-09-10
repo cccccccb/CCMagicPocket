@@ -3,10 +3,6 @@ qt_add_plugin(MagicPocket-DesktopEntity
     mp_entity.cpp mp_entity.h
 )
 
-target_sources(MagicPocket-DesktopEntity
-  PRIVATE
-)
-
 set_target_properties(MagicPocket-DesktopEntity
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules
@@ -44,8 +40,8 @@ set(qml_title_files
 set(qml_bottom_files
     "qml/src/bottom/ActivityDocker.qml"
     "qml/src/bottom/ActivityDockerModel.qml"
-    "qml/src/bottom/ActivityItem.qml"
-    "qml/src/bottom/ActivityView.qml"
+    "qml/src/bottom/ActivityDockerItem.qml"
+    "qml/src/bottom/ActivityDockerView.qml"
 )
 
 set(qml_pane_files
@@ -65,18 +61,17 @@ set(qml_resource_files
 
 qt_add_resources(MagicPocket-DesktopEntity "qml"
     PREFIX
-        "/"
-    BASE
-        "qml"
+        "/CCMagicPocket"
     FILES
         ${qml_resource_files}
 )
-set(res_resource_files
+set(res_image_files
     "res/leftbackground.jpg"
     "res/default_wallpaper_1.jpg"
     "res/default_wallpaper_2.jpg"
     "res/icon.png"
 )
+
 set(res_svg_files
     "res/svg/icon-circle.svg"
     "res/svg/firefox.svg"
@@ -89,14 +84,16 @@ set(res_svg_files
     "res/svg/wechat.svg"
 )
 
+set(res_resource_files
+    ${res_image_files}
+    ${res_svg_files}
+)
+
 qt_add_resources(MagicPocket-DesktopEntity "res"
     PREFIX
-        "/"
-    BASE
-        "res"
+        "/CCMagicPocket"
     FILES
         ${res_resource_files}
-        ${res_svg_files}
 )
 set(icons_resource_files
     "icons/MagicPocket-desktop/32x32/category.png"
@@ -143,14 +140,11 @@ set(icons_resource_files
     "icons/MagicPocket-desktop/32x32@2/notification-on.png"
     "icons/MagicPocket-desktop/32x32@2/fullscreen_exit.png"
     "icons/MagicPocket-desktop/32x32@2/fullscreen.png"
+    "icons/MagicPocket-desktop/scalable/actions/all_application.svg"
     "icons/MagicPocket-desktop/index.theme"
 )
 
 qt_add_resources(MagicPocket-DesktopEntity "icons"
-    PREFIX
-        "/icons"
-    BASE
-        "icons"
     FILES
         ${icons_resource_files}
 )

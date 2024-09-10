@@ -48,5 +48,5 @@ void MPPreload::aboutToPreload(QQmlApplicationEngine *engine)
 
 QUrl MPPreload::preloadModulePath() const
 {
-    return QUrl("qrc:///qml/PreloadWindow.qml");
+    return QUrl("qrc:///CCMagicPocket/qml/PreloadWindow.qml");
 }

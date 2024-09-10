@@ -1,14 +1,14 @@
-qt_add_plugin(MPDesktopPreload
+qt_add_plugin(MagicPocket-Preload
     SHARED
     mp_preload.cpp mp_preload.h
 )
 
-set_target_properties(MPDesktopPreload
+set_target_properties(MagicPocket-Preload
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules
 )
 
-target_link_libraries(MPDesktopPreload PRIVATE
+target_link_libraries(MagicPocket-Preload PRIVATE
     CCQuickStartup
     Qt::Core
     Qt::Gui
@@ -22,9 +22,9 @@ set(qml_resource_files
     "qml/PreloadWindow.qml"
 )
 
-qt_add_resources(MPDesktopPreload "qml"
+qt_add_resources(MagicPocket-Preload "qml"
     PREFIX
-        "/"
+        "/CCMagicPocket"
     FILES
         ${qml_resource_files}
 )
@@ -33,16 +33,14 @@ set(res_resource_files
     "res/icon.png"
 )
 
-qt_add_resources(MPDesktopPreload "res"
+qt_add_resources(MagicPocket-Preload "res"
     PREFIX
-        "/"
-    BASE
-        "res"
+        "/CCMagicPocket"
     FILES
         ${res_resource_files}
 )
 
-install(TARGETS MPDesktopPreload
+install(TARGETS MagicPocket-Preload
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

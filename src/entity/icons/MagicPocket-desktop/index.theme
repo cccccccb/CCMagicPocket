@@ -1,8 +1,8 @@
 [Icon Theme]
 Name=MagicPocket-desktop
-Comment=
+Comment=Magic Pocket
 
-Directories=32x32,32x32@2
+Directories=32x32,32x32@2,scalable/actions
 
 [32x32]
 Size=32
@@ -12,3 +12,10 @@ Type=Fixed
 Size=32
 Scale=2
 Type=Fixed
+
+[scalable/actions]
+Size=64
+Type=Scalable
+MinSize=1
+MaxSize=256
+Context=Actions

@@ -9,6 +9,7 @@ Control {
     property real scaleFactor: 1.0
     property bool slideOn: false
     property bool revertAnimation: false
+    property bool isRunningItem: false
 
     hoverEnabled: true
     padding: 10
@@ -20,6 +21,20 @@ Control {
         radius: 12
 
         transform: root._contentTranslate
+
+        Loader {
+            active: root.isRunningItem
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.bottom
+            anchors.topMargin: 5
+            width: parent.width / 2
+            height: scaleFactor * 2
+
+            sourceComponent: Rectangle {
+                radius: height / 2
+                color: Style.item.hightTextColor
+            }
+        }
     }
 
     contentItem: Item {
@@ -32,7 +47,7 @@ Control {
             anchors.fill: parent
             visible: false
 
-            source: icon
+            source: iconSource
             fillMode: Image.PreserveAspectFit
             sourceSize: Qt.size(48 * scaleFactor, 48 * scaleFactor)
         }

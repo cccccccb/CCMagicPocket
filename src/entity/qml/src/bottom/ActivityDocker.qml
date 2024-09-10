@@ -50,9 +50,38 @@ Control {
     contentItem: Row {
         spacing: 10
 
-        ActivityView {
+        CustomButton {
+            anchors.verticalCenter: parent.verticalCenter
+            display: CustomButton.IconOnly
+            icon.name: "all_application"
+            icon.width: 48
+            icon.height: 48
+            icon.color: "white"
+            width: 48
+            height: 48
+            background: null
+        }
+
+        Loader {
+            active: permanentView.model.count > 0
+            anchors.verticalCenter: parent.verticalCenter
+            width: 2
+            height: Math.max(permanentView.height, activeView.height)
+
+            sourceComponent: Rectangle {
+                width: 2
+                radius: 1
+                color: Qt.alpha(Style.item.hightTextColor, 0.6)
+            }
+        }
+
+        ActivityDockerView {
             id: permanentView
             slideOn: root.slideOn
+
+            Component.onCompleted: {
+                MagicPocket.activityManager.install("C:/WorkStation/Projects/Qt/CCMagicPocket/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/mpk/CCMagicPocketExample.mpk")
+            }
         }
 
         Loader {
@@ -68,34 +97,35 @@ Control {
             }
         }
 
-        ActivityView {
+        ActivityDockerView {
             id: activeView
             slideOn: root.slideOn
             revertAnimation: true
+            runningActivity: true
 
             model: ListModel {
                 ListElement {
-                    icon: "qrc:/svg/google-chrome.svg"
+                    iconSource: "../../../res/svg/google-chrome.svg"
                     name: "Google Chrome"
                 }
 
                 ListElement {
-                    icon: "qrc:/svg/safari.svg"
+                    iconSource: "../../../res/svg/safari.svg"
                     name: "Safari"
                 }
 
                 ListElement {
-                    icon: "qrc:/svg/tiktok.svg"
+                    iconSource: "../../../res/svg/tiktok.svg"
                     name: "TikTok"
                 }
 
                 ListElement {
-                    icon: "qrc:/svg/twitter.svg"
+                    iconSource: "../../../res/svg/twitter.svg"
                     name: "Twitter"
                 }
 
                 ListElement {
-                    icon: "qrc:/svg/wechat.svg"
+                    iconSource: "../../../res/svg/wechat.svg"
                     name: "Wechat"
                 }
             }

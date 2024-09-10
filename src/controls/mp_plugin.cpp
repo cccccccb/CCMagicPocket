@@ -4,19 +4,16 @@
 #include "impl/iconimageprovider.h"
 #include "impl/mpqmlinstance.h"
 #include "impl/mousetransparentitem.h"
+#include "impl/activityinformation.h"
+#include "impl/activityitemmodel.h"
+#include "impl/activitymoduleinformation.h"
 
 #include <qqml.h>
 #include <QDebug>
 
-QT_DECLARE_EXTERN_SYMBOL_VOID(qml_register_types_org_orange_mp)
-
 MPControlExtension::MPControlExtension(QObject *parent)
     : QQmlExtensionPlugin(parent)
 {
-    qmlRegisterTypesAndRevisions<EdgeToEdgeModeHelper>("org.orange.mp", 1);
-    qmlRegisterTypesAndRevisions<FramelessAttached>("org.orange.mp", 1);
-    qmlRegisterTypesAndRevisions<MPQmlInstance>("org.orange.mp", 1);
-    qmlRegisterModule("org.orange.mp", 1, 0);
 }
 
 MPControlExtension::~MPControlExtension()
@@ -70,9 +67,11 @@ void MPControlExtension::registerTypes(const char *uri)
                                                                                    std::placeholders::_1, std::placeholders::_2));
     qmlRegisterUncreatableType<FramelessAttached>(uri, 1, 0, "Frameless", "Frameless is an abstract type that is only available as an attached property.");
     qmlRegisterType<MouseTransparentItem>(uri, 1, 0, "MouseTransparentItem");
+    qmlRegisterType<ActivityInformation>(uri, 1, 0, "ActivityInformation");
+    qmlRegisterType<ActivityItemModel>(uri, 1, 0, "ActivityItemModel");
+    qmlRegisterType<ActivityModuleInformation>(uri, 1, 0, "ActivityModuleInformation");
 
     QString qmlUriPrefix(QLatin1String("qrc:/") + QString(uri).replace(".", "/") + QLatin1String("/modules"));
-
 
     qmlRegisterSingletonType(QUrl(qmlUriPrefix + "/Style/Style.qml"), uri, 1, 0, "Style");
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/CheckedAnimateButton.qml"), uri, 1, 0, "CheckedAnimateButton");

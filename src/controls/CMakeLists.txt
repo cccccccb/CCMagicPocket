@@ -15,6 +15,13 @@ set(DEPENDES_SOURCE
     impl/mpqmlinstance.h
     impl/mousetransparentitem.cpp
     impl/mousetransparentitem.h
+    impl/activityinformation.cpp
+    impl/activityinformation.h
+    impl/activityitemmodel.cpp
+    impl/activityitemmodel.h
+    impl/activitymanager.cpp
+    impl/activitymanager.h
+    impl/activitymoduleinformation.h
     mp_plugin.cpp
     mp_plugin.h
 )
@@ -55,7 +62,7 @@ qt_add_plugin(MPControlExtension
 
 qt_add_resources(MPControlExtension "qml"
     PREFIX
-        "/CCMagicPocket/"
+        "/CCMagicPocket"
     FILES
         ${REGISTER_QML}
         ${PRIVATE_QML}
@@ -74,14 +81,18 @@ set_target_properties(MPControlExtension
 )
 
 target_link_libraries(MPControlExtension PRIVATE
+    CCQuickStartup
     Qt::Core
     Qt::Gui
     Qt::Qml
     Qt::Quick
+    zip
 )
 
 target_include_directories(MPControlExtension PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/impl
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 )
 
 install(TARGETS MPControlExtension

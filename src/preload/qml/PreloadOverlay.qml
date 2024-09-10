@@ -32,7 +32,7 @@ Rectangle {
         }
 
         Image {
-            source: "qrc:/icon.png"
+            source: "../res/icon.png"
             anchors.horizontalCenter: parent.horizontalCenter
         }
 

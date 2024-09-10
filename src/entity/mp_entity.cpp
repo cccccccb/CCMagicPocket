@@ -16,7 +16,7 @@ MPEntity::~MPEntity()
 
 QUrl MPEntity::entityModulePath() const
 {
-    return QUrl("qrc:///src/MainWindow.qml");
+    return QUrl("qrc:///CCMagicPocket/qml/src/MainWindow.qml");
 }
 
 void MPEntity::initialize(QQmlApplicationEngine *)

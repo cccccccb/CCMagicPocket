@@ -73,7 +73,7 @@ Control {
             Image {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                source: "qrc:/svg/icon-circle.svg"
+                source: "../../../res/svg/icon-circle.svg"
                 sourceSize: Qt.size(18, 18)
                 smooth: true
             }

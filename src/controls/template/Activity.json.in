@@ -1,0 +1,9 @@
+{
+    "id": "@MP_ACTIVITY_NAME@",
+    "name": "@MP_ACTIVITY_REAL_NAME@",
+    "version": "@MP_ACTIVITY_VERSION@",
+    "description": "@MP_DESCRIPTION@",
+    "iconPath": "@MP_ICONPATH@",
+    "preloadPath": "@MP_PRELOADPATH@",
+    "entityPath": "@MP_ENTITYPATH@"
+}

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 project(CCMagicPocket VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -10,5 +10,8 @@ qt_standard_project_setup()
 
 # dependency
 add_subdirectory(modules/CCQuickStartup)
-
+# third party
+add_subdirectory(3rdparty)
+# source
 add_subdirectory(src)
+add_subdirectory(examples)

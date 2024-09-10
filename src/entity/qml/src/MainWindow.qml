@@ -20,7 +20,7 @@ AppStartupItem {
             z: -100
             anchors.fill: parent
             anchors.margins: showShadow ? Style.item.marginLevel1 : 0
-            backgroundImagePath: Qt.url("qrc:/default_wallpaper_2.jpg")
+            backgroundImagePath: Qt.url("../../res/default_wallpaper_2.jpg")
 
             CenterPane {
                 id: centerPane
