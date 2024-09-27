@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 
 import CCMagicPocket
+import CCTest as CT
 
 Rectangle {
     color: "white"

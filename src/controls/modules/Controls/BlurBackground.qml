@@ -9,14 +9,15 @@ Item {
     property real radius: 0
 
     function scheduleUpdateOnInterval() {
-        if (scheduleUpdateTimer.running)
-            return
+        var rect = Functional.mapToTarget(root, blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
 
-        scheduleUpdateTimer.start()
+        effectSource.sourceRect = rect
+        effectSource.scheduleUpdate()
     }
 
     Instantiator {
         readonly property Item _parentBackground: Functional.commonParent(root, blurBackground)
+        active:  _parentBackground !== null
         model: Functional.parentsTo(root, _parentBackground)
 
         Connections {
@@ -56,43 +57,21 @@ Item {
         blurEnabled: true
         blurMax: 64
         blur: 1
-        maskEnabled: true
+        maskEnabled: root.radius > 0
         maskSource: mask
         maskThresholdMin: 0.1
         maskSpreadAtMin: 0.1
         maskSpreadAtMax: 1
     }
 
-    Item {
+    Rectangle {
         id: mask
-        width: effectSource.width
-        height: effectSource.height
-        layer.enabled: true
+
+        layer.enabled: root.radius > 0
         visible: false
         antialiasing: true
-
-        Rectangle {
-            width: effectSource.width
-            height: effectSource.height
-            radius: root.radius
-        }
-    }
-
-    Timer {
-        id: scheduleUpdateTimer
-        interval: 5
-        repeat: false
-
-        onTriggered: {
-            var rect = Functional.mapToTarget(root, blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
-            if (rect.x < 0)
-                rect.x = 0
-
-            if (rect.y < 0)
-                rect.y = 0
-
-            effectSource.sourceRect = rect
-            effectSource.scheduleUpdate()
-        }
+        width: effectSource.width
+        height: effectSource.height
+        radius: root.radius
     }
 }

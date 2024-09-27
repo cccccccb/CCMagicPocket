@@ -49,6 +49,7 @@ set(qml_pane_files
     "qml/src/MainPane.qml"
     "qml/src/MainWindow.qml"
     "qml/src/CenterPane.qml"
+    "qml/src/ActivityTemplate.qml"
 )
 
 set(qml_resource_files
@@ -118,6 +119,9 @@ set(icons_resource_files
     "icons/MagicPocket-desktop/32x32/notification-on.png"
     "icons/MagicPocket-desktop/32x32/fullscreen_exit.png"
     "icons/MagicPocket-desktop/32x32/fullscreen.png"
+    "icons/MagicPocket-desktop/32x32/minimize_activity.png"
+    "icons/MagicPocket-desktop/32x32/close_activity.png"
+    "icons/MagicPocket-desktop/32x32/layout_activity.png"
     "icons/MagicPocket-desktop/32x32@2/category.png"
     "icons/MagicPocket-desktop/32x32@2/category_checked.png"
     "icons/MagicPocket-desktop/32x32@2/close.png"
@@ -140,6 +144,9 @@ set(icons_resource_files
     "icons/MagicPocket-desktop/32x32@2/notification-on.png"
     "icons/MagicPocket-desktop/32x32@2/fullscreen_exit.png"
     "icons/MagicPocket-desktop/32x32@2/fullscreen.png"
+    "icons/MagicPocket-desktop/32x32@2/minimize_activity.png"
+    "icons/MagicPocket-desktop/32x32@2/close_activity.png"
+    "icons/MagicPocket-desktop/32x32@2/layout_activity.png"
     "icons/MagicPocket-desktop/scalable/actions/all_application.svg"
     "icons/MagicPocket-desktop/index.theme"
 )

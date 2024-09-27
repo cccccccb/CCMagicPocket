@@ -59,7 +59,6 @@ void MPControlExtension::registerTypes(const char *uri)
                                                                                             std::placeholders::_1, std::placeholders::_2));
     qmlRegisterSingletonType<MPQmlInstance *>(implUri, 1, 0, "MagicPocket", std::bind(&MPControlExtension::mp_singleton_type_provider, this,
                                                                                        std::placeholders::_1, std::placeholders::_2));
-
     // @uri CCMagicPocket
     qmlRegisterSingletonType<EdgeToEdgeModeHelper *>(uri, 1, 0, "EdgeToEdge", std::bind(&MPControlExtension::edge_to_edge_singleton_type_provider, this,
                                                                                         std::placeholders::_1, std::placeholders::_2));
@@ -67,9 +66,9 @@ void MPControlExtension::registerTypes(const char *uri)
                                                                                    std::placeholders::_1, std::placeholders::_2));
     qmlRegisterUncreatableType<FramelessAttached>(uri, 1, 0, "Frameless", "Frameless is an abstract type that is only available as an attached property.");
     qmlRegisterType<MouseTransparentItem>(uri, 1, 0, "MouseTransparentItem");
-    qmlRegisterType<ActivityInformation>(uri, 1, 0, "ActivityInformation");
     qmlRegisterType<ActivityItemModel>(uri, 1, 0, "ActivityItemModel");
-    qmlRegisterType<ActivityModuleInformation>(uri, 1, 0, "ActivityModuleInformation");
+    qmlRegisterType<ActivityInformation>(uri, 1, 0, "activityInformation");
+    qmlRegisterUncreatableType<ActivityModuleInformation>(uri, 1, 0, "activityModuleInformation", "");
 
     QString qmlUriPrefix(QLatin1String("qrc:/") + QString(uri).replace(".", "/") + QLatin1String("/modules"));
 
@@ -82,6 +81,7 @@ void MPControlExtension::registerTypes(const char *uri)
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/BlurBackground.qml"), uri, 1, 0, "BlurBackground");
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/ClipAreaItem.qml"), uri, 1, 0, "ClipAreaItem");
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/InnerShadow.qml"), uri, 1, 0, "InnerShadow");
+    qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/CustomToolTip.qml"), uri, 1, 0, "CustomToolTip");
 }
 
 void MPControlExtension::initializeEngine(QQmlEngine *engine, const char *uri)
@@ -93,5 +93,3 @@ void MPControlExtension::initializeEngine(QQmlEngine *engine, const char *uri)
         edgeToEdge->enable();
     }
 }
-
-#include "mp_plugin.moc"

@@ -11,7 +11,7 @@ CustomButton {
     id: root
 
     property bool slideOn: false
-    property Item blurBackground
+    property alias blurBackground: blurBack.blurBackground
 
     implicitWidth: 40
     implicitHeight: 40
@@ -96,8 +96,8 @@ CustomButton {
         }
 
         BlurBackground {
+            id: blurBack
             anchors.fill: parent
-            blurBackground: root.blurBackground
             radius: root.width / 2
         }
     }

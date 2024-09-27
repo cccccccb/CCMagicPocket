@@ -22,6 +22,9 @@ set(DEPENDES_SOURCE
     impl/activitymanager.cpp
     impl/activitymanager.h
     impl/activitymoduleinformation.h
+
+
+
     mp_plugin.cpp
     mp_plugin.h
 )
@@ -36,6 +39,7 @@ set(REGISTER_QML
     modules/Controls/ClipAreaItem.qml
     modules/Controls/InnerShadow.qml
     modules/Style/Style.qml
+    modules/Controls/CustomToolTip.qml
 )
 
 set(PRIVATE_QML

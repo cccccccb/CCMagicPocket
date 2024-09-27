@@ -7,10 +7,12 @@ import CCStartup
 
 import "left"
 import "title"
+import "bottom"
 
 
 AppStartupItem {
     id: root
+    asynchronous: true
 
     AppStartupComponent {
         id: mainPaneComp

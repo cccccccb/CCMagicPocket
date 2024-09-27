@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
-import org.orange.toklive
-
 Rectangle {
     color: "white"
     border.color: "gray"
@@ -17,14 +15,14 @@ Rectangle {
             ParallelAnimation {
                 NumberAnimation {
                     properties: "y"
-                    duration: Style.item.animationDuration * 2
+                    duration: 300 * 2
                     from: to - 40
                     easing.type: Easing.OutBounce
                 }
 
                 NumberAnimation {
                     properties: "opacity"
-                    duration: Style.item.animationDuration
+                    duration: 300
                     from: 0
                     to: 1
                 }
@@ -43,7 +41,7 @@ Rectangle {
             text: "逗音"
             color: Qt.color("#EEE04F5F")
             font.bold: true
-            font.pointSize: Style.item.fontSize.t1
+            font.pointSize: 13
         }
 
         Row {

@@ -5,11 +5,13 @@ Item {
     id: root
     property Component component
     property real radius: 0
+    property alias clipItem: effectSource.item
 
     Loader {
         id: effectSource
         anchors.fill: parent
         visible: false
+        clip: true
         active: root.component !== null
         sourceComponent: root.component
     }
@@ -17,7 +19,6 @@ Item {
     MultiEffect {
         anchors.fill: effectSource
         source: effectSource
-        autoPaddingEnabled: false
         maskEnabled: true
         maskSource: mask
         maskThresholdMin: 0.1
@@ -27,11 +28,10 @@ Item {
 
     Item {
         id: mask
+        layer.enabled: true
         width: effectSource.width
         height: effectSource.height
-        layer.enabled: true
         visible: false
-        antialiasing: true
 
         Rectangle {
             width: effectSource.width

@@ -8,7 +8,7 @@
 struct ActivityModuleInformation
 {
     Q_GADGET
-    QML_NAMED_ELEMENT(ActivityModuleInformation)
+    QML_NAMED_ELEMENT(activityModuleInformation)
     QML_FOREIGN(AppStartupModuleInformation)
     QML_UNCREATABLE("")
 };

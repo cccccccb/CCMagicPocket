@@ -11,14 +11,14 @@ ListView {
 
     interactive: false
     implicitWidth: contentItem.childrenRect.width
-    implicitHeight: 64
-    orientation: ListView.Horizontal
-    model: MagicPocket.activityManager.installModel
+    implicitHeight: 68
+    orientation: Qt.Horizontal
 
     delegate: ActivityDockerItem {
-        anchors.verticalCenter: parent.verticalCenter
+        id: item
+
         readonly property int indexBetween: 2 - Math.abs(root.hoveredIndex - index)
-        scaleFactor: (root.hoveredIndex === -1 || indexBetween < 0) ? 1 : 1 + indexBetween * 0.3
+        scaleFactor: (root.hoveredIndex === -1 || indexBetween < 0) ? 1 : 1 + indexBetween * 0.2
         slideOn: root.slideOn
         revertAnimation: root.revertAnimation
         isRunningItem: root.runningActivity
@@ -29,6 +29,13 @@ ListView {
             } else if (root.hoveredIndex === index) {
                 root.hoveredIndex = -1
             }
+        }
+
+        onLeftMouseButtonClicked: {
+            if (MagicPocket.activityManager.isRunning(activityName))
+                MagicPocket.activityManager.activate(activityName)
+            else
+                MagicPocket.activityManager.start(activityName)
         }
     }
 }

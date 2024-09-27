@@ -28,12 +28,14 @@ Item {
         Loader {
             clip: true
             anchors.fill: parent
+            asynchronous: true
             active: backgroundImagePath.toString() !== ""
 
             sourceComponent: ClipAreaItem {
                 radius: showShadow ? Style.item.maxRadius : 0
-                component : Image {
+                component: Image {
                     id: sourceItem
+                    asynchronous: true
                     source: backgroundImagePath
                     fillMode: Image.PreserveAspectCrop
                 }

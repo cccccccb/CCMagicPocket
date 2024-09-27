@@ -1,43 +1,87 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 
 import CCMagicPocket
 
-ColumnLayout {
+
+Item {
     id: root
 
-    // RowLayout {
-    //     id: titleLayout
-    //     Item {
-    //         Layout.fillWidth: true
+    clip: true
+    ListView {
+        id: activityView
+        property bool delayHide: false
 
-    //         PopupSearchEdit {
-    //             id: searchEdit
-    //             anchors.centerIn: parent
+        visible: false
+        anchors.fill: parent
+        orientation: Qt.Horizontal
+        model: ObjectModel {
+            children: MagicPocket.activityManager.runningActivity
+        }
 
-    //             Component.onCompleted: {
-    //                 Window.window.Frameless.moveExclude.push(searchEdit)
-    //             }
-    //         }
-    //     }
+        state: "NO_VISIBLE"
+        states: [
+            State {
+                name: "NO_VISIBLE"
+                when: !activityView.visible && !activityView.delayHide
+                PropertyChanges {
+                    target: activityView
+                    scale: 0
+                }
+            },
 
-    //     LogoPane {
-    //         id: logoPane
-    //         Layout.alignment: Qt.AlignCenter
+            State {
+                name: "DELAY_HIDE"
+                when: activityView.visible && activityView.delayHide
+                PropertyChanges {
+                    target: activityView
+                    scale: 0
+                }
+            },
 
-    //         Component.onCompleted: {
-    //             Window.window.Frameless.moveUnder.push(logoPane)
-    //         }
-    //     }
+            State {
+                name: "VISIBLE"
+                when: activityView.visible && !activityView.delayHide
+                PropertyChanges {
+                    target: activityView
+                    scale: 1.0
+                }
+            }
+        ]
 
-    //     Component.onCompleted: {
-    //         Window.window.Frameless.moveUnder.push(titleLayout)
-    //     }
-    // }
+        transitions: [
+            Transition {
+                from: "NO_VISIBLE"
+                to: "VISIBLE"
 
-    // Item {
-    //     Layout.fillWidth: true
-    //     Layout.fillHeight: true
-    // }
+                ScaleAnimator {
+                    duration: 300
+                    easing.type: Easing.OutQuad
+                }
+            },
 
+            Transition {
+                from: "VISIBLE"
+                to: "DELAY_HIDE"
+
+                SequentialAnimation {
+                    PropertyAction { target: activityView; property: "delayHide"; value: true }
+                    ScaleAnimator { target: activityView; duration: 300; easing.type: Easing.InQuad }
+                    PropertyAction { target: activityView; property: "delayHide"; value: false }
+                 }
+            }
+        ]
+    }
+
+    Component {
+        id: runningTemplate
+
+        ActivityTemplate {}
+    }
+
+    Component.onCompleted: {
+        MagicPocket.activityManager.runningContainer = activityView
+        MagicPocket.activityManager.runningTemplate = runningTemplate
+    }
 }

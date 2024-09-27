@@ -14,7 +14,7 @@ class ActivityInformation
     Q_PROPERTY(QString localIconPath READ localIconPath CONSTANT FINAL)
     Q_PROPERTY(QString preloadPath READ preloadPath CONSTANT FINAL)
     Q_PROPERTY(QString entityPath READ entityPath CONSTANT FINAL)
-    QML_NAMED_ELEMENT(ActivityInformation)
+    QML_NAMED_ELEMENT(activityInformation)
 
 public:
     ActivityInformation();

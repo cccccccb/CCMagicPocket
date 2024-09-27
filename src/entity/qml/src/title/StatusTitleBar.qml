@@ -9,11 +9,12 @@ Control {
     id: root
     property bool slideOn: false
     property alias blurBackground: blurBack.blurBackground
+    property int blockSpaceHeight: 24
 
     leftPadding: 10
     rightPadding: 10
     bottomPadding: 10
-    topInset: 20
+    topInset: blockSpaceHeight
     bottomInset: 10
 
     background: Item {
@@ -52,13 +53,11 @@ Control {
     }
 
     contentItem: Item {
-        implicitHeight: statusBlock.implicitHeight + realTitleItem.implicitHeight
+        implicitHeight: root.blockSpaceHeight + realTitleItem.implicitHeight
 
         StatusBlock {
             id: statusBlock
 
-            implicitWidth: 50
-            implicitHeight: 20
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
         }
@@ -67,7 +66,8 @@ Control {
             id: realTitleItem
             width: parent.width
             implicitHeight: 24
-            anchors.top: statusBlock.bottom
+            anchors.top: parent.top
+            anchors.topMargin: root.blockSpaceHeight
             anchors.horizontalCenter: parent.horizontalCenter
 
             Image {
@@ -93,7 +93,7 @@ Control {
                         interval: 500
                         running: true
 
-                        onTriggered: parent.text =  Qt.formatDateTime(new Date(), "MMM-dd")
+                        onTriggered: parent.text = Qt.formatDateTime(new Date(), "MMM-dd")
                     }
                 }
 
@@ -107,7 +107,7 @@ Control {
                         interval: 500
                         running: true
 
-                        onTriggered: parent.text =  Qt.formatDateTime(new Date(), "hh:mm")
+                        onTriggered: parent.text = Qt.formatDateTime(new Date(), "hh:mm:ss")
                     }
                 }
             }
@@ -142,7 +142,6 @@ Control {
             PropertyChanges {
                 target: statusBlock
                 opacity: 1.0
-                width: timerItem.width + 10
             }
         },
         State {
@@ -156,7 +155,6 @@ Control {
             PropertyChanges {
                 target: statusBlock
                 opacity: 0.0
-                width:  10
             }
         }
     ]
@@ -181,7 +179,7 @@ Control {
                 PropertyAnimation {
                     target: statusBlock
                     duration: 400
-                    properties: "opacity,width"
+                    properties: "opacity"
                     easing.type: Easing.OutBack
                 }
             }
@@ -201,7 +199,7 @@ Control {
                 PropertyAnimation {
                     target: statusBlock
                     duration: 400
-                    properties: "opacity,width"
+                    properties: "opacity"
                     easing.type: Easing.InBack
                 }
             }

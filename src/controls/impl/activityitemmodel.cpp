@@ -3,7 +3,12 @@
 
 ActivityItemModel::ActivityItemModel(QObject *parent)
     : QAbstractListModel{parent}
-{}
+{
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Firefox", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/firefox.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Twitter", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/twitter.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Google Chrome", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/google-chrome.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Wechat", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/wechat.svg"), false}));
+}
 
 ActivityItemModel::~ActivityItemModel()
 {
@@ -17,6 +22,37 @@ bool ActivityItemModel::contains(const QString &activityName) const
                        [activityName](const QSharedPointer<ActivityItemModelElement> &element) {
             return element->activityName == activityName;
     });
+}
+
+bool ActivityItemModel::empty() const
+{
+    return _datas.empty();
+}
+
+QSharedPointer<ActivityItemModelElement> ActivityItemModel::element(const QString &activityName) const
+{
+    auto it = std::find_if(_datas.begin(), _datas.end(),
+                           [activityName](const QSharedPointer<ActivityItemModelElement> &element) {
+                               return element->activityName == activityName;
+    });
+
+    if (it == _datas.end())
+        return nullptr;
+
+    return *it;
+}
+
+QSharedPointer<ActivityItemModelElement> ActivityItemModel::element(const QSharedPointer<AppStartupModuleGroup> &module) const
+{
+    auto it = std::find_if(_datas.begin(), _datas.end(),
+                           [module](const QSharedPointer<ActivityItemModelElement> &element) {
+                               return element->module == module;
+                           });
+
+    if (it == _datas.end())
+        return nullptr;
+
+    return *it;
 }
 
 void ActivityItemModel::addItem(const QSharedPointer<ActivityItemModelElement> &element)
@@ -49,7 +85,7 @@ void ActivityItemModel::removeItem(const QSharedPointer<ActivityItemModelElement
     _datas.remove(indexOf);
     if (_activatedElement == element)
         _activatedElement.reset();
-    endInsertRows();
+    endRemoveRows();
 }
 
 int ActivityItemModel::rowCount(const QModelIndex &parent) const
@@ -67,8 +103,8 @@ QVariant ActivityItemModel::data(const QModelIndex &index, int role) const
     case ActivityItemModel::ActivityName: {
         return element->activityName;
     }
-    case ActivityItemModel::ItemName: {
-        return element->name;
+    case ActivityItemModel::DisplayName: {
+        return element->displayName;
     }
     case ActivityItemModel::ItemStatus: {
         return element->status;
@@ -83,10 +119,10 @@ QVariant ActivityItemModel::data(const QModelIndex &index, int role) const
         return element->isActivated;
     }
     case ActivityItemModel::PreloadInformation: {
-        return QVariant::fromValue(element->module->preload());
+        return QVariant::fromValue(element->module ? element->module->preload() : AppStartupModuleInformation());
     }
     case ActivityItemModel::EntityInformation: {
-        return QVariant::fromValue(element->module->entity());
+        return QVariant::fromValue(element->module ? element->module->entity() : AppStartupModuleInformation());
     }
         break;
     default:
@@ -100,7 +136,7 @@ QHash<int, QByteArray> ActivityItemModel::roleNames() const
 {
     static const QHash<int, QByteArray> roles {
         { ActivityName, "activityName" },
-        { ItemName, "name" },
+        { DisplayName, "displayName" },
         { ItemStatus, "status" },
         { VersionString, "versionString" },
         { IconPath, "iconSource" },
@@ -115,7 +151,7 @@ QHash<int, QByteArray> ActivityItemModel::roleNames() const
 void ActivityItemModel::setItemStatus(const QString &activityName, ActivityStatus status)
 {
     int indexOf = -1;
-    auto it = std::find_if(_datas.begin(), _datas.end(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
         indexOf++;
         return element->activityName == activityName;
     });
@@ -130,7 +166,7 @@ void ActivityItemModel::setItemStatus(const QString &activityName, ActivityStatu
 void ActivityItemModel::activateItem(const QString &activityName)
 {
     int indexOf = -1;
-    auto it = std::find_if(_datas.begin(), _datas.end(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
         indexOf++;
         return element->activityName == activityName;
     });
@@ -154,7 +190,7 @@ void ActivityItemModel::activateItem(const QString &activityName)
 void ActivityItemModel::setLocalIconPath(const QString &activityName, const QUrl &localIconPath)
 {
     int indexOf = -1;
-    auto it = std::find_if(_datas.begin(), _datas.end(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
         indexOf++;
         return element->activityName == activityName;
     });
@@ -169,7 +205,7 @@ void ActivityItemModel::setLocalIconPath(const QString &activityName, const QUrl
 void ActivityItemModel::setModule(const QString &activityName, const QSharedPointer<AppStartupModuleGroup> &module)
 {
     int indexOf = -1;
-    auto it = std::find_if(_datas.begin(), _datas.end(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
         indexOf++;
         return element->activityName == activityName;
     });
@@ -183,7 +219,7 @@ void ActivityItemModel::setModule(const QString &activityName, const QSharedPoin
 
 QSharedPointer<AppStartupModuleGroup> ActivityItemModel::module(const QString &activityName) const
 {
-    auto it = std::find_if(_datas.begin(), _datas.end(), [activityName](const QSharedPointer<ActivityItemModelElement> &element) {
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName](const QSharedPointer<ActivityItemModelElement> &element) {
         return element->activityName == activityName;
     });
 
@@ -192,5 +228,3 @@ QSharedPointer<AppStartupModuleGroup> ActivityItemModel::module(const QString &a
 
     return (*it)->module;
 }
-
-

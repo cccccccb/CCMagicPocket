@@ -17,6 +17,9 @@
 #include <QImageReader>
 #include <QBuffer>
 #include <QSaveFile>
+#include <QQmlContext>
+#include <QQuickItem>
+#include <QtQml>
 
 #define ACTIVITY_INSTALLED_PATH (QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) \
                                 + QChar('/') + QLatin1String("activity"))
@@ -29,6 +32,12 @@
 #define ACTIVITY_TMP_ICON_PATH (ACTIVITY_TMP_PATH + QChar('/') + QLatin1String("icons"))
 
 #define ACTIVITY_FILE_NAME "Activity.json"
+
+#define ACTIVITY_SURFACE_PROP "surface"
+
+#define ACTIVITY_CONTAINER_DELAY_HIDE_PROP "delayHide"
+
+#define DD_SLOT_STRING(ARG) #ARG
 
 struct ExtractAllCounterData {
     QString activityName;
@@ -44,16 +53,27 @@ public:
         : qq(qq)
         , _installedModel(new ActivityItemModel(qq))
         , _runningModel(new ActivityItemModel(qq))
+        , _pinnedModel(new ActivityItemModel(qq))
         , _managerPool(new QThreadPool(qq))
     {
         _managerPool->setMaxThreadCount(1);
         _installedPath = ACTIVITY_INSTALLED_PATH;
+
+        AppStartupInstance *instance = AppStartupInstance::instance();
+        QObject::connect(instance, SIGNAL(unloaded(QSharedPointer<AppStartupModuleGroup>)), qq, SLOT(_qq_onModelUnloaded(QSharedPointer<AppStartupModuleGroup>)));
     }
+
+    QByteArray extractSingle(const QString &path, const QString &entryPath);
+    bool extractAll(const QString &activityName, const QString &path, const QString &targetPath, const std::function<void (qint64, qint64)> &callback = {});
+    QQuickItem *createTemplate(const QSharedPointer<ActivityItemModelElement> &element);
+    QQuickItem *findSurfaceItem(QQuickItem *item);
+    void _qq_onModelUnloaded(const QSharedPointer<AppStartupModuleGroup> &module);
+    void _qq_onDelayHided();
+    void activateItem(const QString &activityName);
+    void bindContainerUnVisible();
 
     static int onExtractAll(const char *filename, void *arg);
     static size_t onExtractSingle(void *arg, unsigned long long offset, const void *data, size_t size);
-    QByteArray extractSingle(const QString &path, const QString &entryPath);
-    bool extractAll(const QString &activityName, const QString &path, const QString &targetPath, const std::function<void (qint64, qint64)> &callback = {});
 
     static ActivityInformation parseInformationFromData(const QByteArray &data);
     static ActivityInformation resolveImpl(const QPointer<ActivityManager> &activityManager, const QUrl &activityPath);
@@ -62,9 +82,15 @@ public:
     ActivityManager *qq = nullptr;
 
     QString _installedPath;
+    QString _currentActivity;
     ActivityItemModel *_installedModel = nullptr;
     ActivityItemModel *_runningModel = nullptr;
+    ActivityItemModel *_pinnedModel = nullptr;
     QThreadPool *_managerPool = nullptr;
+    QList<QObject *> _runningActivityItems;
+    QMap<QString, QQuickItem *> _runningItemMaps;
+    QQmlComponent *_runningTemplate = nullptr;
+    QQuickItem *_runningContainer = nullptr;
 };
 
 size_t ActivityManagerPrivate::onExtractSingle(void *arg, unsigned long long offset, const void *data, size_t size)
@@ -82,7 +108,8 @@ int ActivityManagerPrivate::onExtractAll(const char *filename, void *arg)
         counterData->callback(counterData->current, counterData->total);
 
     qDebug() << "[ActivityManager] extract activity: " << counterData->activityName << "filename: "
-             << filename << "progress: " << counterData->current << "/" << counterData->total;
+             << filename << "progress: " << counterData->current << "/" << counterData->total
+             << QThread::currentThread() << qApp->thread();
     return 0;
 }
 
@@ -120,6 +147,114 @@ bool ActivityManagerPrivate::extractAll(const QString &activityName, const QStri
     zip_close(zip);
 
     return zip_extract(path.toStdString().c_str(), targetPath.toStdString().c_str(), onExtractAll, &data) == 0;
+}
+
+QQuickItem *ActivityManagerPrivate::createTemplate(const QSharedPointer<ActivityItemModelElement> &element)
+{
+    if (!this->_runningTemplate) {
+        qWarning() << "[Activity Manager]: you need create running tempate before start the activity";
+        return nullptr;
+    }
+
+    QQmlEngine *engine = qmlEngine(qq->parent());
+    if (!engine)
+        return nullptr;
+
+    QQmlContext *context = new QQmlContext(engine);
+    context->setContextProperty(QLatin1String("displayName"), element->displayName);
+    context->setContextProperty(QLatin1String("activityName"), element->activityName);
+    QQuickItem *templateItem = qobject_cast<QQuickItem *>(this->_runningTemplate->create(context));
+    if (!templateItem)
+        return nullptr;
+
+    engine->setObjectOwnership(templateItem, QQmlEngine::CppOwnership);
+    return templateItem;
+}
+
+QQuickItem *ActivityManagerPrivate::findSurfaceItem(QQuickItem *item)
+{
+    if (!item)
+        return nullptr;
+
+    QVariant val = item->property(ACTIVITY_SURFACE_PROP);
+    if (!val.isValid())
+        return item;
+
+    if (!val.canConvert<QQuickItem *>())
+        return item;
+
+    return val.value<QQuickItem *>();
+}
+
+void ActivityManagerPrivate::_qq_onModelUnloaded(const QSharedPointer<AppStartupModuleGroup> &module)
+{
+    auto element =  _runningModel->element(module);
+    if (element.isNull())
+        return;
+
+    _runningModel->removeItem(element);
+
+    auto clearActivity = [this, element]() {
+        if (_runningItemMaps.contains(element->activityName)) {
+            QQuickItem *item = _runningItemMaps.take(element->activityName);
+            _runningActivityItems.removeOne(item);
+            Q_EMIT qq->runningActivityChanged();
+            item->deleteLater();
+        }
+    };
+
+    if (!_runningContainer) {
+        clearActivity();
+    } else {
+        QObject::connect(_runningContainer, &QQuickItem::visibleChanged, qq, clearActivity, Qt::SingleShotConnection);
+        bindContainerUnVisible();
+    }
+}
+
+void ActivityManagerPrivate::_qq_onDelayHided()
+{
+    if (_runningContainer) {
+        QVariant val = _runningContainer->property(ACTIVITY_CONTAINER_DELAY_HIDE_PROP);
+        if (!val.toBool()) {
+            _runningContainer->setVisible(false);
+        }
+    } else {
+        _runningContainer->setVisible(false);
+    }
+}
+
+void ActivityManagerPrivate::activateItem(const QString &activityName)
+{
+   this->_runningModel->activateItem(activityName);
+   this->_currentActivity = activityName;
+    Q_EMIT qq->currentActivityChanged();
+}
+
+void ActivityManagerPrivate::bindContainerUnVisible()
+{
+    if (!_runningContainer)
+        return;
+
+    QVariant val = _runningContainer->property(ACTIVITY_CONTAINER_DELAY_HIDE_PROP);
+    if (!val.isValid()) {
+        _qq_onDelayHided();
+        return;
+    }
+
+    const QMetaObject *mb = _runningContainer->metaObject();
+    if (!mb) {
+        _qq_onDelayHided();
+        return;
+    }
+
+    const QMetaProperty &mp = mb->property(mb->indexOfProperty(ACTIVITY_CONTAINER_DELAY_HIDE_PROP));
+    if (!mp.isValid() ||!mp.hasNotifySignal()) {
+        _qq_onDelayHided();
+        return;
+    }
+
+    mp.write(_runningContainer, true);
+    QMetaObject::connect(_runningContainer, mp.notifySignalIndex(), qq, qq->metaObject()->indexOfSlot(DD_SLOT_STRING(_qq_onDelayHided())), Qt::SingleShotConnection);
 }
 
 ActivityInformation ActivityManagerPrivate::parseInformationFromData(const QByteArray &data)
@@ -195,7 +330,7 @@ QSharedPointer<ActivityItemModelElement> ActivityManagerPrivate::convertInformat
 {
     QSharedPointer<ActivityItemModelElement> element(new ActivityItemModelElement);
     element->activityName = information.id();
-    element->name = information.name();
+    element->displayName = information.name();
     element->iconPath = QUrl::fromLocalFile(information.localIconPath());
     element->status = ActivityItemModel::NoStatus;
 
@@ -222,7 +357,7 @@ void ActivityManager::setInstalledPath(const QString &installedPath)
     if (dd->_installedPath == installedPath)
         return;
     dd->_installedPath = installedPath;
-    emit installedPathChanged();
+    Q_EMIT installedPathChanged();
 }
 
 ActivityItemModel *ActivityManager::installModel() const
@@ -233,6 +368,49 @@ ActivityItemModel *ActivityManager::installModel() const
 ActivityItemModel *ActivityManager::runningModel() const
 {
     return dd->_runningModel;
+}
+
+ActivityItemModel *ActivityManager::pinnedModel() const
+{
+    return dd->_pinnedModel;
+}
+
+QQmlComponent *ActivityManager::runningTemplate() const
+{
+    return dd->_runningTemplate;
+}
+
+void ActivityManager::setRunningTemplate(QQmlComponent *runingTemplate)
+{
+    if (dd->_runningTemplate == runingTemplate)
+        return;
+
+    dd->_runningTemplate = runingTemplate;
+    Q_EMIT runningTemplateChanged();
+}
+
+QQuickItem *ActivityManager::runningContainer() const
+{
+    return dd->_runningContainer;
+}
+
+void ActivityManager::setRunningContainer(QQuickItem *item)
+{
+    if (dd->_runningContainer == item)
+        return;
+
+    dd->_runningContainer = item;
+    Q_EMIT runningContainerChanged();
+}
+
+QQmlListProperty<QObject> ActivityManager::runningActivity()
+{
+    return QQmlListProperty<QObject>(this, &dd->_runningActivityItems);
+}
+
+QString ActivityManager::currentActivity() const
+{
+    return dd->_currentActivity;
 }
 
 bool ActivityManager::isInstalled(const QString &activityName)
@@ -273,8 +451,10 @@ void ActivityManager::install(const QUrl &activityPath)
         }, Qt::QueuedConnection);
 
         const QString &activityName = information.id();
-        const QString &targetPath = ACTIVITY_INSTALLED_PATH + QChar('/') + QString(activityName).replace(QLatin1Char('.'), QChar('/'));
+        const QString &targetPacketPath = ACTIVITY_INSTALLED_PATH + QChar('/') + QString(activityName).replace(QLatin1Char('.'), QChar('/'));
+        const QString &targetPath = targetPacketPath + QChar('/') + information.version();
         QDir().mkpath(targetPath);
+
         bool success = activityManager->dd->extractAll(activityName, _activityPath.toString(), targetPath);
         ActivityItemModel::ActivityStatus status = ActivityItemModel::Installed;
         if (!success)
@@ -296,7 +476,7 @@ void ActivityManager::install(const QUrl &activityPath)
                     activityManager->dd->_installedModel->setModule(activityName, module);
             }
 
-            Q_EMIT activityManager->installed(success && module.isNull(), activityName);
+            Q_EMIT activityManager->installed(success && !module.isNull(), activityName);
         }, Qt::QueuedConnection);
     });
 }
@@ -337,17 +517,39 @@ void ActivityManager::uninstall(const QString &activityName)
 void ActivityManager::start(const QString &activityName)
 {
     if (isRunning(activityName)) {
-        return;
-    }
-
-    auto module = dd->_runningModel->module(activityName);
-    if (module) {
         activate(activityName);
         return;
     }
 
-    // module->setSurfaceItem();
+    auto module = dd->_installedModel->module(activityName);
+    if (!module) {
+        qWarning() << "[Activity Manager] No activity name: " << activityName << " found in installed model!";
+        return;
+    }
+
+    auto element = dd->_installedModel->element(activityName);
+    if (!element) {
+        //! @todo add error
+        return;
+    }
+
+    QQuickItem *templateItem = dd->createTemplate(element);
+    if (!templateItem) {
+        //! @todo add error
+        return;
+    }
+
+    dd->_runningItemMaps.insert(activityName, templateItem);
+    dd->_runningActivityItems.append(templateItem);
+    Q_EMIT runningActivityChanged();
+
+    module->setSurfaceItem(dd->findSurfaceItem(templateItem));
+    dd->_runningModel->addItem(element);
+    if (dd->_runningContainer)
+        dd->_runningContainer->setVisible(true);
+
     AppStartupInstance::instance()->load(module);
+    dd->activateItem(activityName);
 }
 
 void ActivityManager::stop(const QString &activityName)
@@ -355,6 +557,10 @@ void ActivityManager::stop(const QString &activityName)
     if (!isRunning(activityName)) {
         return;
     }
+
+    auto element = dd->_installedModel->element(activityName);
+    if (!element)
+        return;
 
     auto module = dd->_runningModel->module(activityName);
     if (!module)
@@ -365,15 +571,29 @@ void ActivityManager::stop(const QString &activityName)
 
 void ActivityManager::hide(const QString &activityName)
 {
+    if (dd->_currentActivity != activityName)
+        return;
 
+    dd->bindContainerUnVisible();
+    dd->_currentActivity.clear();
+    Q_EMIT currentActivityChanged();
 }
 
 void ActivityManager::show(const QString &activityName)
 {
+    if (dd->_runningContainer)
+        dd->_runningContainer->setVisible(true);
 
+    dd->activateItem(activityName);
 }
 
 void ActivityManager::activate(const QString &activityName)
 {
+    if (dd->_runningContainer && !dd->_runningContainer->isVisible())
+        dd->_runningContainer->setVisible(true);
 
+    dd->activateItem(activityName);
 }
+
+#include "moc_activitymanager.cpp"
+

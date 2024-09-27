@@ -3,10 +3,11 @@
 #include "activitymanager.h"
 
 #include <QQuickWindow>
+#include <QtQml>
 
 MPQmlInstance::MPQmlInstance(QObject *parent)
     : QObject{parent}
-    , m_activityManager(nullptr)
+    , m_activityManager(new ActivityManager(this))
 {}
 
 MPQmlInstance::~MPQmlInstance()
@@ -16,10 +17,6 @@ MPQmlInstance::~MPQmlInstance()
 
 ActivityManager *MPQmlInstance::activityManager() const
 {
-    if (m_activityManager == nullptr) {
-        m_activityManager = new ActivityManager(const_cast<MPQmlInstance *>(this));
-    }
-
     return m_activityManager;
 }
 
@@ -35,3 +32,5 @@ bool MPQmlInstance::isAndroid() const
 #endif
     return false;
 }
+
+#include "moc_mpqmlinstance.cpp"

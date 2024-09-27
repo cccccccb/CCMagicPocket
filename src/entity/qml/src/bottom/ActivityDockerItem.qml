@@ -4,81 +4,96 @@ import QtQuick.Effects
 
 import CCMagicPocket
 
-Control {
+Item {
     id: root
     property real scaleFactor: 1.0
-    property bool slideOn: false
+    property bool slideOn: true
     property bool revertAnimation: false
     property bool isRunningItem: false
+    property alias hoverEnabled: _mouseArea.hoverEnabled
+    property alias hovered: _mouseArea.containsMouse
 
-    hoverEnabled: true
-    padding: 10
-    background: Rectangle {
-        anchors.fill: parent
-        anchors.margins: 4
+    signal leftMouseButtonClicked()
+    signal rightMouseButtonClicked()
 
-        color: "white"
-        radius: 12
+    implicitWidth: centralControl.implicitWidth + 8
+    implicitHeight: 68
 
-        transform: root._contentTranslate
+    Control {
+        id: centralControl
+        anchors.centerIn: parent
+        hoverEnabled: false
+        padding: 6
 
-        Loader {
-            active: root.isRunningItem
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.bottom
-            anchors.topMargin: 5
-            width: parent.width / 2
-            height: scaleFactor * 2
+        transform: Translate {
+            y: -2 * (centralControl.height - 48 - centralControl.topPadding - centralControl.bottomPadding)
+        }
 
-            sourceComponent: Rectangle {
-                radius: height / 2
-                color: Style.item.hightTextColor
+        background: Rectangle {
+            color: "white"
+            radius: 12
+
+            Loader {
+                active: root.isRunningItem
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.bottom
+                anchors.topMargin: 5
+                width: root.hovered ? 40 : 20
+                height: 3
+
+                sourceComponent: Rectangle {
+                    radius: height / 2
+                    color: Style.item.hightTextColor
+                }
+
+                Behavior on width {
+                    SpringAnimation { spring: 4; damping: 0.2 }
+                }
             }
         }
-    }
 
-    contentItem: Item {
-        anchors.centerIn: parent
-        implicitWidth: 48 * scaleFactor
-        implicitHeight: 48 * scaleFactor
+        contentItem: Item {
+            id: content
+            property real _scaleFactorContent: root.scaleFactor
 
-        Image {
-            id: _blurItem
-            anchors.fill: parent
-            visible: false
+            implicitWidth: 48 * _scaleFactorContent
+            implicitHeight: 48 * _scaleFactorContent
 
-            source: iconSource
-            fillMode: Image.PreserveAspectFit
-            sourceSize: Qt.size(48 * scaleFactor, 48 * scaleFactor)
+            Behavior on _scaleFactorContent {
+                SpringAnimation { spring: 4; damping: 0.2 }
+            }
+
+            Image {
+                id: _blurItem
+                anchors.fill: parent
+                visible: false
+
+                source: iconSource
+                fillMode: Image.PreserveAspectFit
+                sourceSize: Qt.size(48 * content._scaleFactorContent, 48 * content._scaleFactorContent)
+            }
+
+            MultiEffect {
+                source: _blurItem
+                anchors.fill: _blurItem
+
+                shadowEnabled: true
+                shadowColor: Qt.color("#A0000000")
+                shadowBlur: 0.8
+                shadowOpacity: 0.4
+                shadowVerticalOffset: 4
+            }
         }
 
-        MultiEffect {
-            source: _blurItem
-            anchors.fill: _blurItem
-
-            shadowEnabled: true
-            shadowColor: Qt.color("#A0000000")
-            shadowBlur: 0.8
-            shadowOpacity: 0.4
-            shadowVerticalOffset: 4
+        CustomToolTip {
+            visible: root.hovered
+            text: displayName
         }
-
-        transform: root._contentTranslate
-    }
-
-    Behavior on scaleFactor {
-        NumberAnimation {
-            duration: 150
-        }
-    }
-
-    readonly property var _contentTranslate: Translate {
-        y: -(height - 48 - root.topPadding - root.bottomPadding)
     }
 
     property int _slideOnY: 0
 
-    state: "NONSLIDE_ON"
+    state: "SLIDE_ON"
     states: [
         State {
             name: "SLIDE_ON"
@@ -136,5 +151,18 @@ Control {
 
     transform: Translate {
         y: _slideOnY
+    }
+
+    MouseArea {
+        id: _mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.LeftButton)
+                root.leftMouseButtonClicked()
+            else
+                root.rightMouseButtonClicked()
+        }
     }
 }

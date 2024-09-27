@@ -3,6 +3,11 @@ qt_add_plugin(MagicPocket-Preload
     mp_preload.cpp mp_preload.h
 )
 
+target_sources(MagicPocket-Preload
+  PRIVATE
+    model.cpp model.h
+)
+
 set_target_properties(MagicPocket-Preload
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules

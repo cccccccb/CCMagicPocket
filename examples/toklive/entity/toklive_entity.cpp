@@ -3,6 +3,7 @@
 
 #include <QIcon>
 #include <QQmlApplicationEngine>
+#include <QTimer>
 
 TokLiveEntity::TokLiveEntity(QObject *parent)
     : QObject{parent}

@@ -12,6 +12,7 @@ class ActivityItemModel : public QAbstractListModel
     Q_OBJECT
     QML_NAMED_ELEMENT(ActivityItemModel)
     friend class ActivityManager;
+    friend class ActivityManagerPrivate;
 
 public:
     explicit ActivityItemModel(QObject *parent = nullptr);
@@ -32,7 +33,7 @@ public:
 
     enum ActivityRoles {
         ActivityName = Qt::UserRole + 1,
-        ItemName,
+        DisplayName,
         ItemStatus,
         VersionString,
         IconPath,
@@ -42,9 +43,13 @@ public:
     };
 
     bool contains(const QString &activityName) const;
+    bool empty() const;
 
     void addItem(const QSharedPointer<ActivityItemModelElement> &element);
     void removeItem(const QString &activityName);
+
+Q_SIGNALS:
+    void countChanged();
 
 protected:
     int rowCount(const QModelIndex &paren = QModelIndex()) const override;
@@ -57,6 +62,8 @@ protected:
 
     void setModule(const QString &activityName, const QSharedPointer<AppStartupModuleGroup> &module);
     QSharedPointer<AppStartupModuleGroup> module(const QString &activityName) const;
+    QSharedPointer<ActivityItemModelElement> element(const QString &activityName) const;
+    QSharedPointer<ActivityItemModelElement> element(const QSharedPointer<AppStartupModuleGroup> &module) const;
     void removeItem(const QSharedPointer<ActivityItemModelElement> &element);
 
 private:
@@ -67,7 +74,7 @@ private:
 struct ActivityItemModelElement
 {
     QString activityName;
-    QString name;
+    QString displayName;
     ActivityItemModel::ActivityStatus status;
     QString versionString;
     QUrl iconPath;

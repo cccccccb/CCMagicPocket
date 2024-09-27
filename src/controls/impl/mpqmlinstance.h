@@ -27,7 +27,7 @@ public:
 
 private:
     bool m_isAndroid;
-    mutable ActivityManager *m_activityManager;
+    ActivityManager *m_activityManager;
 };
 
 #endif // MAGICPOCKETQMLINSTANCE_H

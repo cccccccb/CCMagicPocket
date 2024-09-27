@@ -6,6 +6,7 @@
 #include <QQmlApplicationEngine>
 #include <QDir>
 #include <QSurfaceFormat>
+#include <QTimer>
 
 static QStringList buildinPluginPaths()
 {
@@ -44,9 +45,33 @@ void MPPreload::aboutToPreload(QQmlApplicationEngine *engine)
     for (const auto &path : pluginList) {
         engine->addPluginPath(path);
     }
+
+    qmlRegisterSingletonType<AnimalModel *>("CCTest", 1, 0, "Model", std::bind(&MPPreload::edge_to_edge_singleton_type_provider, this,
+                                                                               std::placeholders::_1, std::placeholders::_2));
 }
 
 QUrl MPPreload::preloadModulePath() const
 {
     return QUrl("qrc:///CCMagicPocket/qml/PreloadWindow.qml");
+}
+
+QObject *MPPreload::edge_to_edge_singleton_type_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    if (!animalModel) {
+        animalModel = new AnimalModel();
+        animalModel->addAnimal(Animal("Wolf", "Medium"));
+        animalModel->addAnimal(Animal("Polar bear", "Large"));
+        animalModel->addAnimal(Animal("Quoll", "Small"));
+
+        QTimer *timer = new QTimer(this);
+        timer->callOnTimeout([=]() {
+            static int index = 0;
+            animalModel->addAnimal(Animal("Quoll" + QString::number(++index), "Small"));
+        });
+        timer->start(1000);
+    }
+
+    return animalModel;
 }

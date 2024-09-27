@@ -2,8 +2,10 @@
 #define MPPRELOAD_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 #include "interface/appstartuppreloadinterface.h"
+#include "model.h"
 
 class MPPreload : public QObject, public AppStartupPreloadInterface
 {
@@ -17,6 +19,12 @@ public:
 
     void aboutToPreload(QQmlApplicationEngine *engine);
     QUrl preloadModulePath() const;
+
+
+    QObject *edge_to_edge_singleton_type_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+
+private:
+    QPointer<AnimalModel> animalModel;
 };
 
 #endif // MPPRELOAD_H

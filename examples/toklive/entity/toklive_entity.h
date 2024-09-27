@@ -2,6 +2,7 @@
 #define TOKLIVEENTITY_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 #include "interface/appstartupentityinterface.h"
 
@@ -19,6 +20,8 @@ public:
 
     QUrl entityModulePath() const;
     void initialize(QQmlApplicationEngine *engine);
+
+    QObject *edge_to_edge_singleton_type_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
 };
 
 #endif // TOKLIVEENTITY_H

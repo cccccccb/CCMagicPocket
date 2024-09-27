@@ -63,7 +63,8 @@ Control {
         }
 
         Loader {
-            active: permanentView.model.count > 0
+            active: permanentView.count > 0
+            visible: permanentView.count > 0
             anchors.verticalCenter: parent.verticalCenter
             width: 2
             height: Math.max(permanentView.height, activeView.height)
@@ -78,14 +79,17 @@ Control {
         ActivityDockerView {
             id: permanentView
             slideOn: root.slideOn
+            width: contentItem.childrenRect.width
+            model: MagicPocket.activityManager.installModel
 
             Component.onCompleted: {
-                MagicPocket.activityManager.install("C:/WorkStation/Projects/Qt/CCMagicPocket/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/mpk/CCMagicPocketExample.mpk")
+                MagicPocket.activityManager.install("C:/WorkStation/Projects/Qt/CCMagicPocket/build/Desktop_Qt_6_7_2_MSVC2019_64bit-Debug/mpk/CCMagicPocketExample.mpk")
             }
         }
 
         Loader {
-            active: activeView.model.count > 0
+            active: activeView.count > 0
+            visible: activeView.count > 0
             anchors.verticalCenter: parent.verticalCenter
             width: 2
             height: Math.max(permanentView.height, activeView.height)
@@ -102,33 +106,7 @@ Control {
             slideOn: root.slideOn
             revertAnimation: true
             runningActivity: true
-
-            model: ListModel {
-                ListElement {
-                    iconSource: "../../../res/svg/google-chrome.svg"
-                    name: "Google Chrome"
-                }
-
-                ListElement {
-                    iconSource: "../../../res/svg/safari.svg"
-                    name: "Safari"
-                }
-
-                ListElement {
-                    iconSource: "../../../res/svg/tiktok.svg"
-                    name: "TikTok"
-                }
-
-                ListElement {
-                    iconSource: "../../../res/svg/twitter.svg"
-                    name: "Twitter"
-                }
-
-                ListElement {
-                    iconSource: "../../../res/svg/wechat.svg"
-                    name: "Wechat"
-                }
-            }
+            model: MagicPocket.activityManager.runningModel
         }
     }
 
