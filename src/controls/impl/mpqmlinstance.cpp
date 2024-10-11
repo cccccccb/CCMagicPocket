@@ -7,7 +7,7 @@
 
 MPQmlInstance::MPQmlInstance(QObject *parent)
     : QObject{parent}
-    , m_activityManager(new ActivityManager(this))
+    , m_activityManager(nullptr)
 {}
 
 MPQmlInstance::~MPQmlInstance()
@@ -18,6 +18,15 @@ MPQmlInstance::~MPQmlInstance()
 ActivityManager *MPQmlInstance::activityManager() const
 {
     return m_activityManager;
+}
+
+void MPQmlInstance::setActivityManager(ActivityManager *activityManager)
+{
+    if (m_activityManager == activityManager)
+        return;
+
+    m_activityManager = activityManager;
+    Q_EMIT activityManagerChanged();
 }
 
 QUrl MPQmlInstance::toTokIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed)

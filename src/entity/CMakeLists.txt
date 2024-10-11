@@ -52,12 +52,20 @@ set(qml_pane_files
     "qml/src/ActivityTemplate.qml"
 )
 
+set(qml_shaders_files
+    "qml/src/shadereffects/invertcoloreffect.frag"
+    "qml/src/shadereffects/invertcoloreffect.frag.qsb"
+    "qml/src/shadereffects/genie.vert"
+    "qml/src/shadereffects/genie.vert.qsb"
+)
+
 set(qml_resource_files
     ${qml_left_files}
     ${qml_title_files}
     ${qml_bottom_files}
     ${qml_controls_files}
     ${qml_pane_files}
+    ${qml_shaders_files}
 )
 
 qt_add_resources(MagicPocket-DesktopEntity "qml"

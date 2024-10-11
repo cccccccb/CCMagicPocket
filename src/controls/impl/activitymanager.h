@@ -28,7 +28,7 @@ public:
     ~ActivityManager();
 
     QString installedPath() const;
-    void setInstalledPath(const QString &newWorkPath);
+    void setInstalledPath(const QString &installedPath);
 
     ActivityItemModel *installModel() const;
     ActivityItemModel *runningModel() const;

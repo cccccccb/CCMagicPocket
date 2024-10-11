@@ -11,7 +11,7 @@ class MPQmlInstance : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool isAndroid READ isAndroid CONSTANT FINAL)
-    Q_PROPERTY(ActivityManager *activityManager READ activityManager CONSTANT FINAL)
+    Q_PROPERTY(ActivityManager *activityManager READ activityManager WRITE setActivityManager NOTIFY activityManagerChanged FINAL)
 
     QML_SINGLETON
     QML_NAMED_ELEMENT(MagicPocket)
@@ -21,9 +21,13 @@ public:
     ~MPQmlInstance();
 
     ActivityManager *activityManager() const;
-    bool isAndroid() const;
+    void setActivityManager(ActivityManager *activityManager);
 
+    bool isAndroid() const;
     Q_INVOKABLE QUrl toTokIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
+
+Q_SIGNALS:
+    void activityManagerChanged();
 
 private:
     bool m_isAndroid;

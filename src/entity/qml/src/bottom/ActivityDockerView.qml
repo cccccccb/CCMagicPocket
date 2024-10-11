@@ -10,7 +10,7 @@ ListView {
     property bool runningActivity: false
 
     interactive: false
-    implicitWidth: contentItem.childrenRect.width
+    implicitWidth: childrenRect.width
     implicitHeight: 68
     orientation: Qt.Horizontal
 
@@ -37,5 +37,9 @@ ListView {
             else
                 MagicPocket.activityManager.start(activityName)
         }
+    }
+
+    add: Transition {
+        NumberAnimation { properties: "opacity"; from: 0.0; to: 1.0; duration: 500 }
     }
 }

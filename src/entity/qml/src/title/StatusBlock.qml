@@ -14,44 +14,104 @@ Control {
     property bool _expanding: false
     property bool _expandingFinished: true
 
+    property Item blurBackground
+
     hoverEnabled: true
     padding: 10
 
     background: Item {
-        opacity: 0.9
         property int _backWidth: root._expanding ? _expandingLoader.width : root.defaultBackgroundWidth
         property int _backHeight: root._expanding && (expandingModel.count > 0) ? (_expandingLoader.height + 10) : root.defaultBackgroundHeight
 
         implicitWidth: _backWidth
         implicitHeight: root._expanding && (expandingModel.count > 0) ? (_expandingLoader.height + 20) : root.defaultBackgroundHeight * 4
 
-        Rectangle {
-            id: backItem
+        Loader {
+            active: root.blurBackground !== null
             width: parent._backWidth
             height: parent._backHeight
             anchors.centerIn: parent
+            opacity: 0.8
 
-            visible: false
-            radius: root._expanding && (expandingModel.count > 0) ? 8 : 2
-            color: Style.item.hightTextColor
+            sourceComponent: Item {
+                Item {
+                    id: effectRootItem
+                    anchors.fill: parent
+                    visible: false
 
-            Behavior on radius {
-                NumberAnimation {
-                    duration: 300
-                    easing.type: Easing.OutQuart
+                    ShaderEffectSource {
+                        id: sourceEffect
+
+                        function mapToTarget(source, target, rect)
+                        {
+                            return source.mapToItem(target, source.mapFromItem(source.parent, rect))
+                        }
+
+                        visible: false
+                        width: parent.width
+                        height: parent.height
+                        sourceItem: root.blurBackground
+                        sourceRect: mapToTarget(root, root.blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
+                        recursive: false
+                        live: true
+                    }
+
+                    ShaderEffect {
+                        id: invertShaderItem
+                        visible: false
+                        anchors.fill: sourceEffect
+                        property variant source: sourceEffect
+                        fragmentShader: "../shadereffects/invertcoloreffect.frag.qsb"
+                    }
+
+                    BlurBackground {
+                        blurBackground: invertShaderItem
+                        anchors.fill: invertShaderItem
+                        radius: root._expanding && (expandingModel.count > 0) ? 8 : parent.height / 2
+                    }
+                }
+
+                MultiEffect {
+                    source: effectRootItem
+                    anchors.fill: effectRootItem
+                    shadowEnabled: true
+                    shadowColor: "#F0FFFFFF"
+                    shadowBlur: 0.4
+                    shadowOpacity: 0.6
                 }
             }
         }
 
-        MultiEffect {
-            id: sourceEffect
-            source: backItem
-            anchors.fill: backItem
+        Loader {
+            active: root.blurBackground === null
+            width: parent._backWidth
+            height: parent._backHeight
+            anchors.centerIn: parent
 
-            shadowEnabled: true
-            shadowColor: Qt.color("#F8FFFFFF")
-            shadowBlur: 0.4
-            shadowOpacity: 0.6
+            sourceComponent: Item {
+                Rectangle {
+                    id: backRect
+                    radius: root._expanding && (expandingModel.count > 0) ? 8 : 2
+                    color: Qt.alpha(Style.item.hightTextColor, root.blurBackground !== null ? 0.4 : 1.0)
+                    anchors.fill: parent
+
+                    Behavior on radius {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.OutQuart
+                        }
+                    }
+                }
+
+                MultiEffect {
+                    source: backRect
+                    anchors.fill: backRect
+                    shadowEnabled: true
+                    shadowColor: "#F0FFFFFF"
+                    shadowBlur: 0.4
+                    shadowOpacity: 0.6
+                }
+            }
         }
 
         MouseArea {
@@ -63,10 +123,10 @@ Control {
         }
 
         Behavior on _backHeight {
-                NumberAnimation {
-                    duration:  300
-                    easing.type: Easing.OutQuart
-                }
+            NumberAnimation {
+                duration:  300
+                easing.type: Easing.OutQuart
+            }
         }
 
         Behavior on _backWidth {

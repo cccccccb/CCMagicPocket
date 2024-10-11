@@ -89,8 +89,8 @@ public:
     QThreadPool *_managerPool = nullptr;
     QList<QObject *> _runningActivityItems;
     QMap<QString, QQuickItem *> _runningItemMaps;
-    QQmlComponent *_runningTemplate = nullptr;
-    QQuickItem *_runningContainer = nullptr;
+    QPointer<QQmlComponent> _runningTemplate;
+    QPointer<QQuickItem> _runningContainer;
 };
 
 size_t ActivityManagerPrivate::onExtractSingle(void *arg, unsigned long long offset, const void *data, size_t size)
@@ -545,8 +545,9 @@ void ActivityManager::start(const QString &activityName)
 
     module->setSurfaceItem(dd->findSurfaceItem(templateItem));
     dd->_runningModel->addItem(element);
-    if (dd->_runningContainer)
+    if (dd->_runningContainer) {
         dd->_runningContainer->setVisible(true);
+    }
 
     AppStartupInstance::instance()->load(module);
     dd->activateItem(activityName);

@@ -7,6 +7,7 @@
 #include "impl/activityinformation.h"
 #include "impl/activityitemmodel.h"
 #include "impl/activitymoduleinformation.h"
+#include "impl/activitymanager.h"
 
 #include <qqml.h>
 #include <QDebug>
@@ -59,6 +60,7 @@ void MPControlExtension::registerTypes(const char *uri)
                                                                                             std::placeholders::_1, std::placeholders::_2));
     qmlRegisterSingletonType<MPQmlInstance *>(implUri, 1, 0, "MagicPocket", std::bind(&MPControlExtension::mp_singleton_type_provider, this,
                                                                                        std::placeholders::_1, std::placeholders::_2));
+    qmlRegisterType<ActivityManager>(implUri, 1, 0, "ActivityManager");
     // @uri CCMagicPocket
     qmlRegisterSingletonType<EdgeToEdgeModeHelper *>(uri, 1, 0, "EdgeToEdge", std::bind(&MPControlExtension::edge_to_edge_singleton_type_provider, this,
                                                                                         std::placeholders::_1, std::placeholders::_2));
@@ -67,8 +69,6 @@ void MPControlExtension::registerTypes(const char *uri)
     qmlRegisterUncreatableType<FramelessAttached>(uri, 1, 0, "Frameless", "Frameless is an abstract type that is only available as an attached property.");
     qmlRegisterType<MouseTransparentItem>(uri, 1, 0, "MouseTransparentItem");
     qmlRegisterType<ActivityItemModel>(uri, 1, 0, "ActivityItemModel");
-    qmlRegisterType<ActivityInformation>(uri, 1, 0, "activityInformation");
-    qmlRegisterUncreatableType<ActivityModuleInformation>(uri, 1, 0, "activityModuleInformation", "");
 
     QString qmlUriPrefix(QLatin1String("qrc:/") + QString(uri).replace(".", "/") + QLatin1String("/modules"));
 

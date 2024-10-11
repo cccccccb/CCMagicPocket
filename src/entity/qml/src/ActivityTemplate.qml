@@ -31,6 +31,7 @@ Item {
         z: 100
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
+        blurBackground: surfaceItem
 
         expandingItems: [
             RoundAnimateButton {

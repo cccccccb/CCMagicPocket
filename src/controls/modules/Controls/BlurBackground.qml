@@ -55,8 +55,9 @@ Item {
         source: effectSource
         autoPaddingEnabled: false
         blurEnabled: true
-        blurMax: 64
-        blur: 1
+        blurMultiplier: 0.4
+        blurMax: 48
+        blur: 0.8
         maskEnabled: root.radius > 0
         maskSource: mask
         maskThresholdMin: 0.1

@@ -70,7 +70,7 @@ Item {
 
                 source: iconSource
                 fillMode: Image.PreserveAspectFit
-                sourceSize: Qt.size(48 * content._scaleFactorContent, 48 * content._scaleFactorContent)
+                sourceSize: Qt.size(68, 68)
             }
 
             MultiEffect {
