@@ -28,59 +28,81 @@ AppStartupItem {
 
     AppStartupComponent {
         depends: mainComp
-        Text {
-            anchors.centerIn: parent
-            color: "white"
-            text: "这是示例程序"
-            font.bold: true
-            font.pointSize: 16
-        }
-    }
-
-    AppStartupComponent {
-        depends: mainComp
 
         Item {
             anchors.fill: parent
 
-            Rectangle {
-                id: barWithBackground
-                width: 120; height: 50; x: 100; y: 50; radius: 10
-                clip: true
+            // Text {
+            //     id: textItem
+            //     anchors.centerIn: parent
+            //     color: Qt.alpha("midnightblue", 0.6)
+            //     text: "这是示例程序"
+            //     font.bold: true
+            //     font.pointSize: 30
+            //     visible: false
+            //     layer.enabled: true
+            //     font.letterSpacing: 10
+            // }
+
+            Image {
+                id: effectItem
+                source: "../leftbackground.jpg"
+                anchors.centerIn: parent
                 visible: false
-                color: "black"
-                Rectangle {
-                    id: bar
-                    color: "orange"
-                    width: 60; height: 50; radius: 10
-                    NumberAnimation on x {
-                        running: true
-                        from: -(bar.width * 1.2 )
-                        to: barWithBackground.width * 1.2
-                        loops: Animation.Infinite
-                        duration: 1000
-                    }
-                }
             }
 
-            MultiEffect {
-                source: barWithBackground
-                anchors.fill: barWithBackground
-                maskEnabled: true
-                maskSource: roundedRectangleMask
+            Image {
+                id: noiseItem
+                source: "../shaders/noise.png"
+                sourceSize: effectItem.sourceSize
+                visible: false
             }
 
-            Item {
-                id: roundedRectangleMask
-                width: 120; height: 50
-                layer.enabled: true
-                visible: false
-                Rectangle {
-                    color: "black"
-                    width: 120; height: 50; radius: 10
-                    antialiasing: true
+            ShaderEffect {
+                anchors.fill: effectItem
+                property variant source: effectItem
+                property variant noiseSrc: noiseItem
+                property real maskTile: 0.3
+                property color edgeColor: Qt.rgba(1.0, 0.1, 0.0, 0.5)
+                // property real amplitude: 0.04 * 0.1
+                // property real frequency: 20
+                property real time: 0.0
+                NumberAnimation on time {
+                    /*loops: Animation.Infinite;*/
+                    running: false;
+                    id: timeAnimation; from: 0; to: 1.0; duration: 1000;
+
+                    // onStarted: {
+                    //     startText.text = Qt.formatDateTime(new Date(), "hh:mm:ss.zzz")
+                    // }
+
+
+                    // onStopped: {
+                    //     stopText.text = Qt.formatDateTime(new Date(), "hh:mm:ss.zzz")
+                    // }
                 }
+                fragmentShader: "shaders/wobble.frag.qsb"
             }
+
+            // Text {
+            //     id: startText
+            //     anchors.left: button.right
+            // }
+
+            // Text {
+            //     id: stopText
+            //     anchors.left: startText.right
+            // }
+
+            // Button {
+            //     id: button
+            //     text: "donghua"
+            //     x: 200
+            //     y: 100
+            //     onClicked: {
+            //         timeAnimation.start()
+            //     }
+            // }
         }
     }
 }

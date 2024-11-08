@@ -107,6 +107,10 @@ Control {
             revertAnimation: true
             runningActivity: true
             model: MagicPocket.activityManager.runningModel
+
+            Component.onCompleted: {
+                MagicPocket.activityManager.dockerContainer = activeView
+            }
         }
     }
 

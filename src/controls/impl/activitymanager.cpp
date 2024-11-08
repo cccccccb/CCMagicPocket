@@ -8,6 +8,9 @@
 #include <items/appstartupmoduleinformation.h>
 #include <items/appstartupmodulegroup.h>
 
+#include <private/qquicktransition_p.h>
+#include <private/qquicktransitionmanager_p_p.h>
+
 #include <QThreadPool>
 #include <QStandardPaths>
 #include <QDir>
@@ -35,15 +38,43 @@
 
 #define ACTIVITY_SURFACE_PROP "surface"
 
-#define ACTIVITY_CONTAINER_DELAY_HIDE_PROP "delayHide"
-
-#define DD_SLOT_STRING(ARG) #ARG
-
 struct ExtractAllCounterData {
     QString activityName;
     ssize_t total;
     ssize_t current;
     std::function<void (qint64, qint64)> callback;
+};
+
+class ActivityOpearationTransitionManager : public QQuickTransitionManager
+{
+public:
+    ActivityOpearationTransitionManager(const std::function<void (const QString &)> & onFinished = nullptr)
+        : QQuickTransitionManager()
+        , _onFinished(onFinished)
+    {}
+
+    void setOperationActivity(const QString &activityName)
+    {
+        _activityName = activityName;
+    }
+
+    void setFinishedCallback(const std::function<void (const QString &)> & onFinished)
+    {
+        _onFinished = onFinished;
+    }
+
+protected:
+    virtual void finished() override
+    {
+        if (_onFinished)
+            _onFinished(_activityName);
+
+        _activityName.clear();
+    }
+
+private:
+    QString _activityName;
+    std::function<void (const QString &)> _onFinished;
 };
 
 class ActivityManagerPrivate
@@ -59,18 +90,31 @@ public:
         _managerPool->setMaxThreadCount(1);
         _installedPath = ACTIVITY_INSTALLED_PATH;
 
+        _hideTransitionManager.setFinishedCallback([this](const QString &activityName) {
+            onHide(this->_runningContainer);
+        });
+
+        _closeTransitionManager.setFinishedCallback([this](const QString &activityName) {
+            auto module = _runningModel->module(activityName);
+            if (!module)
+                return;
+
+            AppStartupInstance::instance()->unload(module);
+        });
+
         AppStartupInstance *instance = AppStartupInstance::instance();
+        QObject::connect(instance, SIGNAL(loaded(QSharedPointer<AppStartupModuleGroup>)), qq, SLOT(_qq_onModelLoaded(QSharedPointer<AppStartupModuleGroup>)));
         QObject::connect(instance, SIGNAL(unloaded(QSharedPointer<AppStartupModuleGroup>)), qq, SLOT(_qq_onModelUnloaded(QSharedPointer<AppStartupModuleGroup>)));
     }
 
     QByteArray extractSingle(const QString &path, const QString &entryPath);
     bool extractAll(const QString &activityName, const QString &path, const QString &targetPath, const std::function<void (qint64, qint64)> &callback = {});
-    QQuickItem *createTemplate(const QSharedPointer<ActivityItemModelElement> &element);
+    QQuickItem *createTemplate(const QSharedPointer<ActivityItemModelElement> &element, QQuickItem *view);
     QQuickItem *findSurfaceItem(QQuickItem *item);
+    void _qq_onModelLoaded(const QSharedPointer<AppStartupModuleGroup> &module);
     void _qq_onModelUnloaded(const QSharedPointer<AppStartupModuleGroup> &module);
-    void _qq_onDelayHided();
     void activateItem(const QString &activityName);
-    void bindContainerUnVisible();
+    void onHide(QQuickItem *target);
 
     static int onExtractAll(const char *filename, void *arg);
     static size_t onExtractSingle(void *arg, unsigned long long offset, const void *data, size_t size);
@@ -82,7 +126,7 @@ public:
     ActivityManager *qq = nullptr;
 
     QString _installedPath;
-    QString _currentActivity;
+    QString _currentActivityName;
     ActivityItemModel *_installedModel = nullptr;
     ActivityItemModel *_runningModel = nullptr;
     ActivityItemModel *_pinnedModel = nullptr;
@@ -91,6 +135,16 @@ public:
     QMap<QString, QQuickItem *> _runningItemMaps;
     QPointer<QQmlComponent> _runningTemplate;
     QPointer<QQuickItem> _runningContainer;
+    QPointer<QQuickItem> _runningLayoutView;
+    QPointer<QQuickItem> _runningDockerContainer;
+    QQuickTransition *_hideTransition = nullptr;
+    QQuickTransition *_showTransition = nullptr;
+    QQuickTransition *_openTransition = nullptr;
+    QQuickTransition *_closeTransition = nullptr;
+    ActivityOpearationTransitionManager _hideTransitionManager;
+    ActivityOpearationTransitionManager _showTransitionManager;
+    ActivityOpearationTransitionManager _openTransitionManager;
+    ActivityOpearationTransitionManager _closeTransitionManager;
 };
 
 size_t ActivityManagerPrivate::onExtractSingle(void *arg, unsigned long long offset, const void *data, size_t size)
@@ -149,7 +203,7 @@ bool ActivityManagerPrivate::extractAll(const QString &activityName, const QStri
     return zip_extract(path.toStdString().c_str(), targetPath.toStdString().c_str(), onExtractAll, &data) == 0;
 }
 
-QQuickItem *ActivityManagerPrivate::createTemplate(const QSharedPointer<ActivityItemModelElement> &element)
+QQuickItem *ActivityManagerPrivate::createTemplate(const QSharedPointer<ActivityItemModelElement> &element, QQuickItem *view)
 {
     if (!this->_runningTemplate) {
         qWarning() << "[Activity Manager]: you need create running tempate before start the activity";
@@ -163,6 +217,7 @@ QQuickItem *ActivityManagerPrivate::createTemplate(const QSharedPointer<Activity
     QQmlContext *context = new QQmlContext(engine);
     context->setContextProperty(QLatin1String("displayName"), element->displayName);
     context->setContextProperty(QLatin1String("activityName"), element->activityName);
+    context->setContextProperty(QLatin1String("view"), view);
     QQuickItem *templateItem = qobject_cast<QQuickItem *>(this->_runningTemplate->create(context));
     if (!templateItem)
         return nullptr;
@@ -186,6 +241,15 @@ QQuickItem *ActivityManagerPrivate::findSurfaceItem(QQuickItem *item)
     return val.value<QQuickItem *>();
 }
 
+void ActivityManagerPrivate::_qq_onModelLoaded(const QSharedPointer<AppStartupModuleGroup> &module)
+{
+    auto element =  _runningModel->element(module);
+    if (element.isNull())
+        return;
+
+    Q_EMIT qq->opened(element->activityName);
+}
+
 void ActivityManagerPrivate::_qq_onModelUnloaded(const QSharedPointer<AppStartupModuleGroup> &module)
 {
     auto element =  _runningModel->element(module);
@@ -203,58 +267,37 @@ void ActivityManagerPrivate::_qq_onModelUnloaded(const QSharedPointer<AppStartup
         }
     };
 
-    if (!_runningContainer) {
-        clearActivity();
-    } else {
-        QObject::connect(_runningContainer, &QQuickItem::visibleChanged, qq, clearActivity, Qt::SingleShotConnection);
-        bindContainerUnVisible();
+    clearActivity();
+    if (_currentActivityName == element->activityName) {
+        onHide(_runningContainer);
     }
-}
 
-void ActivityManagerPrivate::_qq_onDelayHided()
-{
-    if (_runningContainer) {
-        QVariant val = _runningContainer->property(ACTIVITY_CONTAINER_DELAY_HIDE_PROP);
-        if (!val.toBool()) {
-            _runningContainer->setVisible(false);
-        }
-    } else {
-        _runningContainer->setVisible(false);
-    }
+    Q_EMIT qq->closed(element->activityName);
 }
 
 void ActivityManagerPrivate::activateItem(const QString &activityName)
 {
-   this->_runningModel->activateItem(activityName);
-   this->_currentActivity = activityName;
-    Q_EMIT qq->currentActivityChanged();
+    this->_runningModel->activateItem(activityName);
+
+    if (this->_currentActivityName != activityName) {
+        this->_currentActivityName = activityName;
+        Q_EMIT qq->currentActivityChanged();
+        Q_EMIT qq->currentActivityNameChanged();
+    }
 }
 
-void ActivityManagerPrivate::bindContainerUnVisible()
+void ActivityManagerPrivate::onHide(QQuickItem *target)
 {
-    if (!_runningContainer)
+    if (!target)
         return;
 
-    QVariant val = _runningContainer->property(ACTIVITY_CONTAINER_DELAY_HIDE_PROP);
-    if (!val.isValid()) {
-        _qq_onDelayHided();
+    target->setVisible(false);
+    if (_currentActivityName.isEmpty())
         return;
-    }
 
-    const QMetaObject *mb = _runningContainer->metaObject();
-    if (!mb) {
-        _qq_onDelayHided();
-        return;
-    }
-
-    const QMetaProperty &mp = mb->property(mb->indexOfProperty(ACTIVITY_CONTAINER_DELAY_HIDE_PROP));
-    if (!mp.isValid() ||!mp.hasNotifySignal()) {
-        _qq_onDelayHided();
-        return;
-    }
-
-    mp.write(_runningContainer, true);
-    QMetaObject::connect(_runningContainer, mp.notifySignalIndex(), qq, qq->metaObject()->indexOfSlot(DD_SLOT_STRING(_qq_onDelayHided())), Qt::SingleShotConnection);
+    _currentActivityName.clear();
+    Q_EMIT qq->currentActivityChanged();
+    Q_EMIT qq->currentActivityNameChanged();
 }
 
 ActivityInformation ActivityManagerPrivate::parseInformationFromData(const QByteArray &data)
@@ -403,14 +446,103 @@ void ActivityManager::setRunningContainer(QQuickItem *item)
     Q_EMIT runningContainerChanged();
 }
 
+QQuickItem *ActivityManager::runningLayoutView() const
+{
+    return dd->_runningLayoutView;
+}
+
+void ActivityManager::setRunningLayoutView(QQuickItem *runningLayoutView)
+{
+    if (dd->_runningLayoutView == runningLayoutView)
+        return;
+
+    dd->_runningLayoutView = runningLayoutView;
+    Q_EMIT runningLayoutViewChanged();
+}
+
+QQuickItem *ActivityManager::dockerContainer() const
+{
+    return dd->_runningDockerContainer;
+}
+
+void ActivityManager::setDockerContainer(QQuickItem *item)
+{
+    if (dd->_runningDockerContainer == item)
+        return;
+
+    dd->_runningDockerContainer = item;
+    Q_EMIT dockerContainerChanged();
+}
+
 QQmlListProperty<QObject> ActivityManager::runningActivity()
 {
     return QQmlListProperty<QObject>(this, &dd->_runningActivityItems);
 }
 
-QString ActivityManager::currentActivity() const
+QQuickItem *ActivityManager::currentActivity() const
 {
-    return dd->_currentActivity;
+    return dd->_runningItemMaps.value(dd->_currentActivityName);
+}
+
+QString ActivityManager::currentActivityName() const
+{
+    return dd->_currentActivityName;
+}
+
+QQuickTransition *ActivityManager::hideTransition() const
+{
+    return dd->_hideTransition;
+}
+
+void ActivityManager::setHideTransition(QQuickTransition *hideTransition)
+{
+    if (dd->_hideTransition == hideTransition)
+        return;
+
+    dd->_hideTransition = hideTransition;
+    Q_EMIT hideTransitionChanged();
+}
+
+QQuickTransition *ActivityManager::showTransition() const
+{
+    return dd->_showTransition;
+}
+
+void ActivityManager::setShowTransition(QQuickTransition *showTransition)
+{
+    if (dd->_showTransition == showTransition)
+        return;
+
+    dd->_showTransition = showTransition;
+    Q_EMIT showTransitionChanged();
+}
+
+QQuickTransition *ActivityManager::openTransition() const
+{
+    return dd->_openTransition;
+}
+
+void ActivityManager::setOpenTransition(QQuickTransition *openTransition)
+{
+    if (dd->_openTransition == openTransition)
+        return;
+
+    dd->_openTransition = openTransition;
+    Q_EMIT openTransitionChanged();
+}
+
+QQuickTransition *ActivityManager::closeTransition() const
+{
+    return dd->_closeTransition;
+}
+
+void ActivityManager::setCloseTransition(QQuickTransition *closeTransition)
+{
+    if (dd->_closeTransition == closeTransition)
+        return;
+
+    dd->_closeTransition = closeTransition;
+    Q_EMIT closeTransitionChanged();
 }
 
 bool ActivityManager::isInstalled(const QString &activityName)
@@ -421,6 +553,11 @@ bool ActivityManager::isInstalled(const QString &activityName)
 bool ActivityManager::isRunning(const QString &activityName)
 {
     return dd->_runningModel->contains(activityName);
+}
+
+QQuickItem *ActivityManager::runningItemAt(const QString &activityName)
+{
+    return dd->_runningItemMaps.value(activityName, nullptr);
 }
 
 void ActivityManager::resolve(const QUrl &activityPath)
@@ -484,7 +621,7 @@ void ActivityManager::install(const QUrl &activityPath)
 void ActivityManager::uninstall(const QString &activityName)
 {
     if (isRunning(activityName)) {
-        stop(activityName);
+        close(activityName);
     }
 
     if (!dd->_installedModel->contains(activityName))
@@ -514,7 +651,7 @@ void ActivityManager::uninstall(const QString &activityName)
     });
 }
 
-void ActivityManager::start(const QString &activityName)
+void ActivityManager::open(const QString &activityName)
 {
     if (isRunning(activityName)) {
         activate(activityName);
@@ -533,27 +670,32 @@ void ActivityManager::start(const QString &activityName)
         return;
     }
 
-    QQuickItem *templateItem = dd->createTemplate(element);
+    QQuickItem *templateItem = dd->createTemplate(element, dd->_runningContainer);
     if (!templateItem) {
         //! @todo add error
         return;
     }
 
+    dd->_runningModel->addItem(element);
     dd->_runningItemMaps.insert(activityName, templateItem);
     dd->_runningActivityItems.append(templateItem);
     Q_EMIT runningActivityChanged();
 
     module->setSurfaceItem(dd->findSurfaceItem(templateItem));
-    dd->_runningModel->addItem(element);
     if (dd->_runningContainer) {
         dd->_runningContainer->setVisible(true);
     }
 
-    AppStartupInstance::instance()->load(module);
     dd->activateItem(activityName);
+    if (dd->_openTransition) {
+        dd->_openTransitionManager.setOperationActivity(activityName);
+        dd->_openTransitionManager.transition({}, dd->_openTransition, dd->_runningContainer);
+    }
+
+    AppStartupInstance::instance()->load(module);
 }
 
-void ActivityManager::stop(const QString &activityName)
+void ActivityManager::close(const QString &activityName)
 {
     if (!isRunning(activityName)) {
         return;
@@ -567,25 +709,56 @@ void ActivityManager::stop(const QString &activityName)
     if (!module)
         return;
 
-    AppStartupInstance::instance()->unload(module);
+    if (dd->_closeTransition) {
+        dd->_closeTransitionManager.setOperationActivity(activityName);
+        dd->_closeTransitionManager.transition({}, dd->_closeTransition, dd->_runningContainer);
+    } else {
+        AppStartupInstance::instance()->unload(module);
+    }
 }
 
 void ActivityManager::hide(const QString &activityName)
 {
-    if (dd->_currentActivity != activityName)
+    if (dd->_currentActivityName != activityName)
         return;
 
-    dd->bindContainerUnVisible();
-    dd->_currentActivity.clear();
-    Q_EMIT currentActivityChanged();
+    if (dd->_hideTransition) {
+        dd->_hideTransitionManager.setOperationActivity(activityName);
+        dd->_hideTransitionManager.transition({}, dd->_hideTransition, dd->_runningContainer);
+    } else {
+        dd->onHide(dd->_runningContainer);
+    }
 }
 
 void ActivityManager::show(const QString &activityName)
 {
-    if (dd->_runningContainer)
-        dd->_runningContainer->setVisible(true);
+    activate(activityName);
+}
 
-    dd->activateItem(activityName);
+void ActivityManager::layout(const QString &activityName)
+{
+    if (!dd->_runningLayoutView) {
+        qWarning() << "[Activity Manager] specify the layout view before you layout!";
+        return;
+    }
+
+    if (dd->_runningLayoutView->isVisible())
+        return;
+
+    dd->_runningLayoutView->setVisible(true);
+}
+
+void ActivityManager::exitLayout(const QString &activityName)
+{
+    if (!dd->_runningLayoutView) {
+        qWarning() << "[Activity Manager] specify the layout view before you layout!";
+        return;
+    }
+
+    if (!dd->_runningLayoutView->isVisible())
+        return;
+
+    dd->_runningLayoutView->setVisible(false);
 }
 
 void ActivityManager::activate(const QString &activityName)
@@ -593,8 +766,13 @@ void ActivityManager::activate(const QString &activityName)
     if (dd->_runningContainer && !dd->_runningContainer->isVisible())
         dd->_runningContainer->setVisible(true);
 
-    dd->activateItem(activityName);
+    if (dd->_showTransition) {
+        dd->activateItem(activityName);
+        dd->_showTransitionManager.setOperationActivity(activityName);
+        dd->_showTransitionManager.transition({}, dd->_showTransition, dd->_runningContainer);
+    } else {
+        dd->activateItem(activityName);
+    }
 }
 
 #include "moc_activitymanager.cpp"
-

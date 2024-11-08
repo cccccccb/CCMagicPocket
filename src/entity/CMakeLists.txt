@@ -44,12 +44,21 @@ set(qml_bottom_files
     "qml/src/bottom/ActivityDockerView.qml"
 )
 
+set(qml_activity_file
+    "qml/src/activity/ActivityTemplate.qml"
+    "qml/src/activity/ActivityContainer.qml"
+    "qml/src/activity/ActivityLayoutView.qml"
+    "qml/src/activity/ActivityLayoutDelegate.qml"
+    "qml/src/activity/ShowHideTransition.qml"
+    "qml/src/activity/CloseTransition.qml"
+    "qml/src/activity/MotionBehavior.qml"
+)
+
 set(qml_pane_files
     "qml/src/NavigationBarGroup.qml"
     "qml/src/MainPane.qml"
     "qml/src/MainWindow.qml"
     "qml/src/CenterPane.qml"
-    "qml/src/ActivityTemplate.qml"
 )
 
 set(qml_shaders_files
@@ -57,6 +66,13 @@ set(qml_shaders_files
     "qml/src/shadereffects/invertcoloreffect.frag.qsb"
     "qml/src/shadereffects/genie.vert"
     "qml/src/shadereffects/genie.vert.qsb"
+    "qml/src/shadereffects/burn.frag"
+    "qml/src/shadereffects/burn.frag.qsb"
+)
+
+set(qml_effects_files
+    "qml/src/effects/BurnOutEffect.qml"
+    "qml/src/effects/MagicInEffect.qml"
 )
 
 set(qml_resource_files
@@ -66,6 +82,8 @@ set(qml_resource_files
     ${qml_controls_files}
     ${qml_pane_files}
     ${qml_shaders_files}
+    ${qml_effects_files}
+    ${qml_activity_file}
 )
 
 qt_add_resources(MagicPocket-DesktopEntity "qml"
@@ -93,9 +111,14 @@ set(res_svg_files
     "res/svg/wechat.svg"
 )
 
+set(res_shaders_files
+    "res/shaders/noise.png"
+)
+
 set(res_resource_files
     ${res_image_files}
     ${res_svg_files}
+    ${res_shaders_files}
 )
 
 qt_add_resources(MagicPocket-DesktopEntity "res"

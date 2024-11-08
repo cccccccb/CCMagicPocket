@@ -10,6 +10,7 @@ Item {
     property bool slideOn: true
     property bool revertAnimation: false
     property bool isRunningItem: false
+    property bool isCurrentItem: isRunningItem ? (MagicPocket.activityManager.currentActivityName === activityName && activityName !== "") : false
     property alias hoverEnabled: _mouseArea.hoverEnabled
     property alias hovered: _mouseArea.containsMouse
 
@@ -47,7 +48,10 @@ Item {
                 }
 
                 Behavior on width {
-                    SpringAnimation { spring: 4; damping: 0.2 }
+                    SpringAnimation {
+                        spring: 4
+                        damping: 0.2
+                    }
                 }
             }
         }
@@ -85,9 +89,14 @@ Item {
             }
         }
 
-        CustomToolTip {
-            visible: root.hovered
-            text: displayName
+        Loader {
+            active: root.hovered
+
+            sourceComponent: CustomToolTip {
+                parent: centralControl
+                visible: root.hovered
+                text: displayName
+            }
         }
     }
 

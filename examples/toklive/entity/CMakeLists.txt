@@ -15,6 +15,11 @@ set(qml_resource_files
     "qml/src/MainWindow.qml"
 )
 
+set(qml_shaders_files
+    "qml/src/shaders/wobble.frag"
+    "qml/src/shaders/wobble.frag.qsb"
+)
+
 qt_add_resources(TokLive-DesktopEntity "qml"
     PREFIX
         "/TokLive"
@@ -22,15 +27,19 @@ qt_add_resources(TokLive-DesktopEntity "qml"
         "qml"
     FILES
         ${qml_resource_files}
+        ${qml_shaders_files}
 )
 set(res_resource_files
     "res/leftbackground.jpg"
     "res/live.png"
+    "res/shaders/noise.png"
 )
 
 qt_add_resources(TokLive-DesktopEntity "res"
     PREFIX
         "/TokLive"
+    BASE
+        "res"
     FILES
         ${res_resource_files}
 )

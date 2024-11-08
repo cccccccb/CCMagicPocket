@@ -4,10 +4,9 @@
 #include "impl/iconimageprovider.h"
 #include "impl/mpqmlinstance.h"
 #include "impl/mousetransparentitem.h"
-#include "impl/activityinformation.h"
 #include "impl/activityitemmodel.h"
-#include "impl/activitymoduleinformation.h"
 #include "impl/activitymanager.h"
+#include "impl/modularlistmodel.h"
 
 #include <qqml.h>
 #include <QDebug>
@@ -69,6 +68,7 @@ void MPControlExtension::registerTypes(const char *uri)
     qmlRegisterUncreatableType<FramelessAttached>(uri, 1, 0, "Frameless", "Frameless is an abstract type that is only available as an attached property.");
     qmlRegisterType<MouseTransparentItem>(uri, 1, 0, "MouseTransparentItem");
     qmlRegisterType<ActivityItemModel>(uri, 1, 0, "ActivityItemModel");
+    qmlRegisterType<ModularListModel>(uri, 1, 0, "ModularListModel");
 
     QString qmlUriPrefix(QLatin1String("qrc:/") + QString(uri).replace(".", "/") + QLatin1String("/modules"));
 

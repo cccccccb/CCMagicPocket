@@ -8,6 +8,7 @@ ListView {
     property bool slideOn: false
     property bool revertAnimation: false
     property bool runningActivity: false
+    property var runningActivityItem
 
     interactive: false
     implicitWidth: childrenRect.width
@@ -35,11 +36,38 @@ ListView {
             if (MagicPocket.activityManager.isRunning(activityName))
                 MagicPocket.activityManager.activate(activityName)
             else
-                MagicPocket.activityManager.start(activityName)
+                MagicPocket.activityManager.open(activityName)
+        }
+
+        Connections {
+            enabled: item.isRunningItem
+            target: item
+
+            function onIsCurrentItemChanged() {
+                if (isCurrentItem) {
+                    item.ListView.view.runningActivityItem = item
+                }
+            }
         }
     }
 
     add: Transition {
-        NumberAnimation { properties: "opacity"; from: 0.0; to: 1.0; duration: 500 }
+        NumberAnimation {
+            properties: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 500
+        }
+    }
+
+    Connections {
+        enabled: root.runningActivity
+        target: MagicPocket.activityManager
+
+        function onCurrentActivityChanged() {
+            if (MagicPocket.activityManager.currentActivity === null) {
+                root.runningActivityItem = null
+            }
+        }
     }
 }

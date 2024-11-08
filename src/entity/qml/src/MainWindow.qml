@@ -23,16 +23,23 @@ AppStartupItem {
             anchors.fill: parent
             anchors.margins: showShadow ? Style.item.marginLevel1 : 0
             backgroundImagePath: Qt.url("../../res/default_wallpaper_2.jpg")
-
-            CenterPane {
-                id: centerPane
-                anchors.fill: parent
-            }
         }
     }
 
+
     AppStartupComponent {
+        id: centerPaneComponent
         depends: mainPaneComp
+
+        CenterPane {
+            parent: AppStartupItem.mainPane
+            anchors.fill: parent
+        }
+    }
+
+
+    AppStartupComponent {
+        depends: centerPaneComponent
 
         NavigationBarGroup {
             anchors.fill: parent

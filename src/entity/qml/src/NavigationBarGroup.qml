@@ -19,7 +19,7 @@ Rectangle {
         id: statusBar
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 60
-        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible
+        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
         blurBackground: navigationRoot.blurBackground
     }
 
@@ -27,7 +27,7 @@ Rectangle {
         id: activityDocker
 
         anchors.horizontalCenter: parent.horizontalCenter
-        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible
+        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
         blurBackground: navigationRoot.blurBackground
     }
 
@@ -42,7 +42,7 @@ Rectangle {
 
     SlidePopupButton {
         id: slideButton
-        slideOn: (populate && !leftControlBar.visible) && !MagicPocket.activityManager.runningContainer.visible
+        slideOn: (populate && !leftControlBar.visible) && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
         blurBackground: navigationRoot.blurBackground
 
         onClicked: {

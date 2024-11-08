@@ -22,8 +22,8 @@ set(DEPENDES_SOURCE
     impl/activitymanager.cpp
     impl/activitymanager.h
     impl/activitymoduleinformation.h
-
-
+    impl/modularlistmodel.h
+    impl/modularlistmodel.cpp
 
     mp_plugin.cpp
     mp_plugin.h
@@ -90,6 +90,7 @@ target_link_libraries(MPControlExtension PRIVATE
     Qt::Gui
     Qt::Qml
     Qt::Quick
+    Qt::QuickPrivate
     zip
 )
 

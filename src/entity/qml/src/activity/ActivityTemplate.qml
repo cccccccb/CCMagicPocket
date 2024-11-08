@@ -3,35 +3,27 @@ import QtQuick.Controls
 
 import CCMagicPocket
 
-import "title"
-import "controls"
+import "../title"
+import "../controls"
 
 
 Item {
     id: root
 
-    property alias surface: surfaceItem
-
-    Binding {
-        when: root.ListView.view !== null
-        root.width: root.ListView.view.width
-    }
-
-    Binding {
-        when: root.ListView.view !== null
-        root.height: root.ListView.view.height
-    }
-
-    Item {
-        id: surfaceItem
+    property bool isCurrentItem: activityName === MagicPocket.activityManager.runningActivity && activityName !== ""
+    property Item surface: Item {
+        parent: root
         anchors.fill: parent
     }
+
+    width: MagicPocket.activityManager.runningContainer.width
+    height: MagicPocket.activityManager.runningContainer.height
 
     StatusBlock {
         z: 100
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        blurBackground: surfaceItem
+        blurBackground: root.surface
 
         expandingItems: [
             RoundAnimateButton {
@@ -52,6 +44,10 @@ Item {
                 hoveredIn: true
                 backgroundColor: Qt.hsla(0.6, 0.7, 0.4, 0.6)
                 backgroundBorderColor: Qt.hsla(0.6, 1, 0.2, 0.8)
+
+                onClicked: {
+                    MagicPocket.activityManager.layout(activityName)
+                }
             },
 
             RoundAnimateButton {
@@ -62,7 +58,7 @@ Item {
                 backgroundBorderColor: Qt.hsla(0, 1, 0.2, 0.8)
 
                 onClicked: {
-                    MagicPocket.activityManager.stop(activityName)
+                    MagicPocket.activityManager.close(activityName)
                 }
             }
         ]
