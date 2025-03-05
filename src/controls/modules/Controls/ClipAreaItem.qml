@@ -19,7 +19,7 @@ Item {
     MultiEffect {
         anchors.fill: effectSource
         source: effectSource
-        maskEnabled: true
+        maskEnabled: false
         maskSource: mask
         maskThresholdMin: 0.1
         maskSpreadAtMin: 0.1

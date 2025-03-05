@@ -4,10 +4,10 @@
 ActivityItemModel::ActivityItemModel(QObject *parent)
     : QAbstractListModel{parent}
 {
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Firefox", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/firefox.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Twitter", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/twitter.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Google Chrome", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/google-chrome.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Wechat", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/WorkStation/Projects/Qt/CCMagicPocket/src/entity/res/svg/wechat.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Firefox", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/firefox.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Twitter", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/twitter.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Google Chrome", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/google-chrome.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Wechat", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/wechat.svg"), false}));
 }
 
 ActivityItemModel::~ActivityItemModel()

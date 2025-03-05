@@ -1,6 +1,6 @@
-#include "Frameless.h"
-#include "FramelessWorker.h"
-#include "FramelessWorkerEvent.h"
+#include "frameless.h"
+#include "framelessworker.h"
+#include "framelessworkerevent.h"
 
 #include <QWindow>
 #include <QMouseEvent>

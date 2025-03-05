@@ -8,7 +8,7 @@ import CCMagicPocket
 Control {
     id: root
     property bool slideOn: false
-    property alias blurBackground: blurBack.blurBackground
+    property alias blurBackground : blurBack.blurBackground
     property alias permanentModel: permanentView.model
     property alias activeModel: activeView.model
 
@@ -79,11 +79,10 @@ Control {
         ActivityDockerView {
             id: permanentView
             slideOn: root.slideOn
-            width: contentItem.childrenRect.width
             model: MagicPocket.activityManager.installModel
 
             Component.onCompleted: {
-                MagicPocket.activityManager.install("C:/WorkStation/Projects/Qt/CCMagicPocket/build/Desktop_Qt_6_7_2_MSVC2019_64bit-Debug/mpk/CCMagicPocketExample.mpk")
+                MagicPocket.activityManager.install("C:/workspace/project/CCMagicPocket/build/Desktop_Qt_6_8_2_MinGW_64_bit-Debug/mpk/CCMagicPocketExample.mpk")
             }
         }
 

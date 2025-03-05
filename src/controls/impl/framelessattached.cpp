@@ -1,89 +1,125 @@
 #include "framelessattached.h"
+
+#ifdef Q_OS_WIN
+#include "frameless_win.h"
+#else
 #include "frameless.h"
+#endif
 
 #include <QQuickItem>
 
 FramelessAttached::FramelessAttached(QQuickWindow *parent)
     : QObject{parent}
-    , m_frameless(new Frameless(parent, this))
+#ifdef Q_OS_WIN
+    , _frameless(new WinFrameless(parent, this))
+#else
+    , _frameless(new Frameless(parent, this))
+#endif
 {
 }
 
 QQmlListProperty<QQuickItem> FramelessAttached::moveUnder()
 {
-    return {this, &m_moveUnderContainer};
+#ifdef Q_OS_WIN
+    return {this, _frameless->moveUnderPointer()};
+#else
+    return {this, &_moveUnderContainer};
+#endif
 }
 
 QQmlListProperty<QQuickItem> FramelessAttached::moveExclude()
 {
-    return {this, &m_moveExcludeContainer};
+#ifdef Q_OS_WIN
+    return {this, _frameless->moveExcludePointer()};
+#else
+    return {this, &_moveExcludeContainer};
+#endif
 }
 
 int FramelessAttached::frameBorder() const
 {
-    return m_frameless->framelessBorder();
+#ifdef Q_OS_WIN
+#else
+    return _frameless->framelessBorder();
+#endif
+    return 0;
 }
 
 void FramelessAttached::setFrameBorder(int newFrameBorder)
 {
-    if (m_frameless->framelessBorder() == newFrameBorder)
+#ifdef Q_OS_WIN
+#else
+    if (_frameless->framelessBorder() == newFrameBorder)
         return;
-    m_frameless->setFramelessBorder(newFrameBorder);
-    emit frameBorderChanged();
+
+    _frameless->setFramelessBorder(newFrameBorder);
+    Q_EMIT frameBorderChanged();
+#endif
 }
 
 bool FramelessAttached::canWindowResize() const
 {
-    return m_frameless->canWindowResize();
+    return _frameless->canWindowResize();
 }
 
 void FramelessAttached::setCanWindowResize(bool newCanWindowResize)
 {
-    if (m_frameless->canWindowResize() == newCanWindowResize)
+    if (_frameless->canWindowResize() == newCanWindowResize)
         return;
-    m_frameless->setCanWindowResize(newCanWindowResize);
-    emit canWindowResizeChanged();
+
+    _frameless->setCanWindowResize(newCanWindowResize);
+    Q_EMIT canWindowResizeChanged();
 }
 
 
 bool FramelessAttached::enabled() const
 {
-    return m_frameless->enabled();
+    return _frameless->enabled();
 }
 
 void FramelessAttached::setEnabled(bool newEnable)
 {
-    if (m_frameless->enabled() == newEnable)
+    if (_frameless->enabled() == newEnable)
         return;
 
+#ifndef Q_OS_WIN
     if (newEnable) {
-        m_frameless->window()->installEventFilter(this);
+        _frameless->window()->installEventFilter(this);
     } else {
-        m_frameless->window()->removeEventFilter(this);
+        _frameless->window()->removeEventFilter(this);
     }
+#endif
 
-    m_frameless->setEnabled(newEnable);
-    emit enabledChanged();
+    _frameless->setEnabled(newEnable);
+    Q_EMIT enabledChanged();
 }
 
 qreal FramelessAttached::contentMargins() const
 {
-    return m_frameless->contentMargins();
+#ifdef Q_OS_WIN
+    return 0;
+#else
+    return _frameless->contentMargins();
+#endif
 }
 
 void FramelessAttached::setContentMargins(qreal newContentMargins)
 {
-    if (qFuzzyCompare(m_frameless->contentMargins(), newContentMargins))
+#ifdef Q_OS_WIN
+#else
+    if (qFuzzyCompare(_frameless->contentMargins(), newContentMargins))
         return;
-    m_frameless->setContentMargins(newContentMargins);
-    emit contentMarginsChanged();
+
+    _frameless->setContentMargins(newContentMargins);
+    Q_EMIT contentMarginsChanged();
+#endif
 }
 
 void FramelessAttached::activateWindow()
 {
-    m_frameless->window()->setWindowStates(m_frameless->window()->windowStates() & ~Qt::WindowMinimized);
-    m_frameless->window()->raise();
-    m_frameless->window()->requestActivate();
+    _frameless->window()->setWindowStates(_frameless->window()->windowStates() & ~Qt::WindowMinimized);
+    _frameless->window()->raise();
+    _frameless->window()->requestActivate();
 }
 
 FramelessAttached *FramelessAttached::qmlAttachedProperties(QObject *object)
@@ -95,32 +131,34 @@ FramelessAttached *FramelessAttached::qmlAttachedProperties(QObject *object)
     return nullptr;
 }
 
+#ifndef Q_OS_WIN
 bool FramelessAttached::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == m_frameless->window()) {
+    if (watched == _frameless->window()) {
         if (event->type() == QEvent::MouseButtonPress) {
-            auto underIncludeContainer = std::find_if(m_moveUnderContainer.begin(), m_moveUnderContainer.end(),
+            auto underIncludeContainer = std::find_if(_moveUnderContainer.begin(), _moveUnderContainer.end(),
                     [](QQuickItem *item) {
                 return item->isUnderMouse() && item->isEnabled();
             });
 
-            auto underExcludeContainer = std::find_if(m_moveExcludeContainer.begin(), m_moveExcludeContainer.end(),
+            auto underExcludeContainer = std::find_if(_moveExcludeContainer.begin(), _moveExcludeContainer.end(),
                                           [](QQuickItem *item) {
                 return item->isUnderMouse() && item->isEnabled();
             });
 
-            if (underIncludeContainer != m_moveUnderContainer.end()) {
-                m_frameless->setCanWindowMove((underExcludeContainer == m_moveExcludeContainer.end())
+            if (underIncludeContainer != _moveUnderContainer.end()) {
+                _frameless->setCanWindowMove((underExcludeContainer == _moveExcludeContainer.end())
                                               || ((*underIncludeContainer)->isAncestorOf((*underExcludeContainer))
                                                       ? false
                                                       : ((*underIncludeContainer)->z() > (*underExcludeContainer)->z())));
             } else {
-                m_frameless->setCanWindowMove(false);
+                _frameless->setCanWindowMove(false);
             }
         }
 
-        m_frameless->targetEvent(event);
+        _frameless->targetEvent(event);
     }
 
     return QObject::eventFilter(watched, event);
 }
+#endif

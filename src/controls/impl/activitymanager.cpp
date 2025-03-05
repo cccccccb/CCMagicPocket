@@ -710,6 +710,9 @@ void ActivityManager::close(const QString &activityName)
         return;
 
     if (dd->_closeTransition) {
+        if (dd->_closeTransitionManager.isRunning())
+            return;
+
         dd->_closeTransitionManager.setOperationActivity(activityName);
         dd->_closeTransitionManager.transition({}, dd->_closeTransition, dd->_runningContainer);
     } else {

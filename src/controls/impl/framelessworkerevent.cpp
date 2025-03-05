@@ -1,4 +1,4 @@
-#include "FramelessWorkerEvent.h"
+#include "framelessworkerevent.h"
 
 FramelessEvent::FramelessEvent(EventType type)
     : mEventType(type)

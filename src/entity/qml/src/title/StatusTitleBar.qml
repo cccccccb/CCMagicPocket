@@ -57,9 +57,11 @@ Control {
 
         StatusBlock {
             id: statusBlock
+            z: 5
 
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
+            expandingItems: WindowButtonPane { }
         }
 
         Item {

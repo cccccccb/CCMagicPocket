@@ -2,6 +2,7 @@ import QtQml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
+import "../effects"
 
 import CCMagicPocket
 
@@ -14,17 +15,18 @@ Control {
     property bool _expanding: false
     property bool _expandingFinished: true
 
+    property int _cornerRadius
+
     property Item blurBackground
 
     hoverEnabled: true
     padding: 10
 
     background: Item {
-        property int _backWidth: root._expanding ? _expandingLoader.width : root.defaultBackgroundWidth
-        property int _backHeight: root._expanding && (expandingModel.count > 0) ? (_expandingLoader.height + 10) : root.defaultBackgroundHeight
+        property int _backWidth
+        property int _backHeight
 
         implicitWidth: _backWidth
-        implicitHeight: root._expanding && (expandingModel.count > 0) ? (_expandingLoader.height + 20) : root.defaultBackgroundHeight * 4
 
         Loader {
             active: root.blurBackground !== null
@@ -34,50 +36,29 @@ Control {
             opacity: 0.8
 
             sourceComponent: Item {
-                Item {
-                    id: effectRootItem
-                    anchors.fill: parent
+                anchors.fill: parent
+
+                ShaderEffectSource {
+                    id: sourceEffect
+
+                    function mapToTarget(source, target, rect)
+                    {
+                        return source.mapToItem(target, source.mapFromItem(source.parent, rect))
+                    }
+
                     visible: false
-
-                    ShaderEffectSource {
-                        id: sourceEffect
-
-                        function mapToTarget(source, target, rect)
-                        {
-                            return source.mapToItem(target, source.mapFromItem(source.parent, rect))
-                        }
-
-                        visible: false
-                        width: parent.width
-                        height: parent.height
-                        sourceItem: root.blurBackground
-                        sourceRect: mapToTarget(root, root.blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
-                        recursive: false
-                        live: true
-                    }
-
-                    ShaderEffect {
-                        id: invertShaderItem
-                        visible: false
-                        anchors.fill: sourceEffect
-                        property variant source: sourceEffect
-                        fragmentShader: "../shadereffects/invertcoloreffect.frag.qsb"
-                    }
-
-                    BlurBackground {
-                        blurBackground: invertShaderItem
-                        anchors.fill: invertShaderItem
-                        radius: root._expanding && (expandingModel.count > 0) ? 8 : parent.height / 2
-                    }
+                    width: parent.width
+                    height: parent.height
+                    sourceItem: root.blurBackground
+                    sourceRect: mapToTarget(root, root.blurBackground, Qt.rect(root.x, root.y, root.width, root.height))
+                    recursive: false
+                    live: false
                 }
 
-                MultiEffect {
-                    source: effectRootItem
-                    anchors.fill: effectRootItem
-                    shadowEnabled: true
-                    shadowColor: "#F0FFFFFF"
-                    shadowBlur: 0.4
-                    shadowOpacity: 0.6
+                InvertColorEffect {
+                    anchors.fill: parent
+                    source: sourceEffect
+                    radius: root._cornerRadius
                 }
             }
         }
@@ -88,29 +69,9 @@ Control {
             height: parent._backHeight
             anchors.centerIn: parent
 
-            sourceComponent: Item {
-                Rectangle {
-                    id: backRect
-                    radius: root._expanding && (expandingModel.count > 0) ? 8 : 2
-                    color: Qt.alpha(Style.item.hightTextColor, root.blurBackground !== null ? 0.4 : 1.0)
-                    anchors.fill: parent
-
-                    Behavior on radius {
-                        NumberAnimation {
-                            duration: 300
-                            easing.type: Easing.OutQuart
-                        }
-                    }
-                }
-
-                MultiEffect {
-                    source: backRect
-                    anchors.fill: backRect
-                    shadowEnabled: true
-                    shadowColor: "#F0FFFFFF"
-                    shadowBlur: 0.4
-                    shadowOpacity: 0.6
-                }
+            sourceComponent: Rectangle {
+                radius: root._cornerRadius
+                color: Qt.alpha(Style.item.hightTextColor, root.blurBackground !== null ? 0.4 : 1.0)
             }
         }
 
@@ -119,27 +80,6 @@ Control {
             onClicked: {
                 root._expandingFinished = false
                 root._expanding = true
-            }
-        }
-
-        Behavior on _backHeight {
-            NumberAnimation {
-                duration:  300
-                easing.type: Easing.OutQuart
-            }
-        }
-
-        Behavior on _backWidth {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuart
-            }
-        }
-
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuart
             }
         }
     }
@@ -156,12 +96,12 @@ Control {
 
             Binding {
                 when: _expandingLoader.item !== null
-                _expandingLoader.width: _expandingLoader.item.width
+                _expandingLoader.width: _expandingLoader.item.childrenWidth
             }
 
             Binding {
                 when: _expandingLoader.item !== null
-                _expandingLoader.height: _expandingLoader.item.height
+                _expandingLoader.height: _expandingLoader.item.childrenHeight
             }
 
             ObjectModel {
@@ -169,14 +109,15 @@ Control {
             }
 
             sourceComponent: Item {
-                width: childrenRect.width + 20
-                height: childrenRect.height
+                enabled: root._expandingFinished
+                property int childrenWidth: childrenRect.width + 20
+                property int childrenHeight: childrenRect.height
 
                 Row {
+                    x: 10
                     spacing: 10
                     width: childrenRect.width
                     height: childrenRect.height
-                    x: 10
 
                     Repeater {
                         model: expandingModel
@@ -193,8 +134,16 @@ Control {
             when: hovered && !_expanding
 
             PropertyChanges {
+                target: root.background
+                _backWidth: root.defaultBackgroundWidth
+                _backHeight: root.defaultBackgroundHeight
+                implicitHeight: root.defaultBackgroundHeight * 4
+            }
+
+            PropertyChanges {
                 target: root
                 scale: 1.4
+                _cornerRadius: 2
             }
 
             PropertyChanges {
@@ -212,8 +161,16 @@ Control {
             when: _expanding
 
             PropertyChanges {
+                target: root.background
+                _backWidth: _expandingLoader.width
+                _backHeight: (expandingModel.count > 0) ? (_expandingLoader.height + 10) : root.defaultBackgroundHeight
+                implicitHeight: (expandingModel.count > 0) ? (_expandingLoader.height + 20) : root.defaultBackgroundHeight * 4
+            }
+
+            PropertyChanges {
                 target: root
                 scale: 1
+                _cornerRadius: (expandingModel.count > 0) ? 8 : 2
             }
 
             PropertyChanges {
@@ -231,6 +188,13 @@ Control {
             when: !_expanding && !hovered
 
             PropertyChanges {
+                target: root.background
+                _backWidth: root.defaultBackgroundWidth
+                _backHeight: root.defaultBackgroundHeight
+                implicitHeight: root.defaultBackgroundHeight * 4
+            }
+
+            PropertyChanges {
                 target: statusContent
                 opacity: 0
             }
@@ -243,6 +207,7 @@ Control {
             PropertyChanges {
                 target: root
                 scale: 1
+                _cornerRadius: 2
             }
         }
     ]
@@ -252,24 +217,39 @@ Control {
             from: "HOVERED"
             to: "EXPANDING"
 
-            ParallelAnimation {
+            SequentialAnimation {
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: statusContent
+                        property: "opacity"
+                        duration: 400
+                        easing.type: Easing.OutBack
+                    }
+
+                    ScaleAnimator {
+                        target: root
+                        duration: 400
+                        easing.type: Easing.OutBack
+                    }
+
+                    NumberAnimation {
+                        target: root
+                        property: "_cornerRadius"
+                        duration: 300
+                    }
+
+                    NumberAnimation {
+                        target: root.background
+                        properties: "_backWidth,_backHeight,implicitHeight"
+                        duration: 400
+                        easing.type: Easing.OutQuart
+                    }
+                }
+
                 PropertyAction {
                     target: root
                     property: "_expandingFinished"
                     value: true
-                }
-
-                NumberAnimation {
-                    target: statusContent
-                    property: "opacity"
-                    duration: 1400
-                    easing.type: Easing.OutBack
-                }
-
-                ScaleAnimator {
-                    target: root
-                    duration: 400
-                    easing.type: Easing.OutBack
                 }
             }
         },
@@ -277,12 +257,25 @@ Control {
             from: "EXPANDING"
             to: "NOHOVERED_NOEXPANDING"
 
-            SequentialAnimation {
+            ParallelAnimation {
                 NumberAnimation {
                     target: statusContent
                     property: "opacity"
                     duration: 400
                     easing.type: Easing.OutBack
+                }
+
+                NumberAnimation {
+                    target: root.background
+                    properties: "_backWidth,_backHeight,implicitHeight"
+                    duration: 400
+                    easing.type: Easing.OutQuart
+                }
+
+                NumberAnimation {
+                    target: root
+                    property: "_cornerRadius"
+                    duration: 300
                 }
 
                 PropertyAction {
@@ -291,7 +284,6 @@ Control {
                     value: true
                 }
             }
-
         },
         Transition {
             from: "*"
@@ -315,6 +307,13 @@ Control {
                     target: root
                     duration: 400
                     easing.type: Easing.OutBack
+                }
+
+                NumberAnimation {
+                    target: root.background
+                    properties: "_backWidth,_backHeight,implicitHeight"
+                    duration: 400
+                    easing.type: Easing.OutQuart
                 }
             }
         }

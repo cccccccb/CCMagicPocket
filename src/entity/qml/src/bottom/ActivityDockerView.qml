@@ -10,6 +10,8 @@ ListView {
     property bool runningActivity: false
     property var runningActivityItem
 
+    property int _hoveredDelayIndex: -1
+
     interactive: false
     implicitWidth: childrenRect.width
     implicitHeight: 68
@@ -26,10 +28,15 @@ ListView {
 
         onHoveredChanged: {
             if (hovered) {
-                root.hoveredIndex = index
-            } else if (root.hoveredIndex === index) {
-                root.hoveredIndex = -1
+                root._hoveredDelayIndex = index
+            } else if (root._hoveredDelayIndex === index) {
+                root._hoveredDelayIndex = -1
             }
+
+            if (delayUpdateIndexTimer.running)
+                return
+
+            delayUpdateIndexTimer.start()
         }
 
         onLeftMouseButtonClicked: {
@@ -68,6 +75,15 @@ ListView {
             if (MagicPocket.activityManager.currentActivity === null) {
                 root.runningActivityItem = null
             }
+        }
+    }
+
+    Timer {
+        id: delayUpdateIndexTimer
+
+        interval: 0
+        onTriggered: {
+            root.hoveredIndex = root._hoveredDelayIndex
         }
     }
 }

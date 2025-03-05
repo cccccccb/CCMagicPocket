@@ -7,11 +7,10 @@ import CCStartup
 
 import "../controls"
 
-PopupPane {
+Control {
     id: root
 
-    padding: 10
-    implicitHeight: 40
+    padding: 6
     implicitWidth: contentItem.implicitWidth + 2 * padding
 
     contentItem: Item {
@@ -20,19 +19,19 @@ PopupPane {
         implicitWidth: closeButton.width + maxButton.width + minButton.width + fullscreenButton.width + controlSpacing * 3
 
         RoundAnimateButton {
-            id: closeButton
+            id: minButton
 
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
 
-            hoveredIn: root.hoveredIn
-            icon.iconName: "close"
+            icon.iconName: "minimize"
             icon.iconColor: "white"
-            backgroundColor: Qt.hsla(0, 1, 0.6, 0.8)
-            backgroundBorderColor: Qt.hsla(0, 1, 0.2, 0.8)
+
+            backgroundColor: Qt.hsla(0.4, 0.7, 0.4, 0.6)
+            backgroundBorderColor: Qt.hsla(0.4, 1, 0.2, 0.8)
 
             onClicked: {
-                Window.window.close()
+                Window.window.showMinimized()
             }
         }
 
@@ -40,9 +39,8 @@ PopupPane {
             id: maxButton
 
             readonly property var rootItem: maxButton.AppStartupItem.startupItem
-            hoveredIn: root.hoveredIn
             anchors.leftMargin: contentRoot.controlSpacing
-            anchors.left: closeButton.right
+            anchors.left: minButton.right
             anchors.verticalCenter: parent.verticalCenter
 
             icon.iconName: (rootItem.Window.window.visibility === Window.Windowed
@@ -66,7 +64,6 @@ PopupPane {
             id: fullscreenButton
 
             readonly property var rootItem: fullscreenButton.AppStartupItem.startupItem
-            hoveredIn: root.hoveredIn
             anchors.leftMargin: contentRoot.controlSpacing
             anchors.left: maxButton.right
             anchors.verticalCenter: parent.verticalCenter
@@ -88,21 +85,19 @@ PopupPane {
         }
 
         RoundAnimateButton {
-            id: minButton
+            id: closeButton
 
-            hoveredIn: root.hoveredIn
             anchors.leftMargin: contentRoot.controlSpacing
             anchors.left: fullscreenButton.right
             anchors.verticalCenter: parent.verticalCenter
 
-            icon.iconName: "minimize"
+            icon.iconName: "close"
             icon.iconColor: "white"
-
-            backgroundColor: Qt.hsla(0.4, 0.7, 0.4, 0.6)
-            backgroundBorderColor: Qt.hsla(0.4, 1, 0.2, 0.8)
+            backgroundColor: Qt.hsla(0, 1, 0.6, 0.8)
+            backgroundBorderColor: Qt.hsla(0, 1, 0.2, 0.8)
 
             onClicked: {
-                Window.window.showMinimized()
+                Window.window.close()
             }
         }
     }

@@ -16,7 +16,7 @@ Control {
     property alias pressedIn: mouseArea.pressed
     signal clicked()
 
-    readonly property bool _hoveredIn: hovered || hoveredIn
+    readonly property bool _hoveredIn: enabled && (hovered || hoveredIn)
 
     hoverEnabled: true
 
@@ -109,11 +109,19 @@ Control {
     }
 
     transitions: Transition {
-        PropertyAnimation {
-            targets: [root, icon]
-            properties: "width,height,scale"
-            duration: Style.item.animationDuration
-            easing.type: Easing.OutBack
+        ParallelAnimation {
+            PropertyAnimation {
+                targets: root
+                properties: "width,height"
+                duration: Style.item.animationDuration
+                easing.type: Easing.OutBack
+            }
+
+            ScaleAnimator {
+                target: icon
+                duration: Style.item.animationDuration
+                easing.type: Easing.OutBack
+            }
         }
     }
 }

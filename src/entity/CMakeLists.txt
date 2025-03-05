@@ -28,13 +28,13 @@ set(qml_controls_files
 set(qml_left_files
     "qml/src/left/LeftNavigationBar.qml"
     "qml/src/left/NavigationPopup.qml"
-    "qml/src/left/WindowButtonPane.qml"
     "qml/src/left/SlidePopupButton.qml"
 )
 
 set(qml_title_files
     "qml/src/title/StatusTitleBar.qml"
     "qml/src/title/StatusBlock.qml"
+    "qml/src/title/WindowButtonPane.qml"
 )
 
 set(qml_bottom_files
@@ -73,6 +73,7 @@ set(qml_shaders_files
 set(qml_effects_files
     "qml/src/effects/BurnOutEffect.qml"
     "qml/src/effects/MagicInEffect.qml"
+    "qml/src/effects/InvertColorEffect.qml"
 )
 
 set(qml_resource_files
@@ -97,6 +98,7 @@ set(res_image_files
     "res/default_wallpaper_1.jpg"
     "res/default_wallpaper_2.jpg"
     "res/icon.png"
+    "res/shadow.png"
 )
 
 set(res_svg_files

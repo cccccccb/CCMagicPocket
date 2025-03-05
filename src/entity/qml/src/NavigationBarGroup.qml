@@ -19,7 +19,7 @@ Rectangle {
         id: statusBar
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 60
-        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
+        slideOn: root.populate /*&& !leftControlBar.visible*/ && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
         blurBackground: navigationRoot.blurBackground
     }
 
@@ -27,26 +27,26 @@ Rectangle {
         id: activityDocker
 
         anchors.horizontalCenter: parent.horizontalCenter
-        slideOn: root.populate && !leftControlBar.visible && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
+        slideOn: root.populate /*&& !leftControlBar.visible*/ && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
         blurBackground: navigationRoot.blurBackground
     }
 
-    NavigationPopup {
-        id: leftControlBar
-        y: 20
-        height: parent.height - 40
+    // NavigationPopup {
+    //     id: leftControlBar
+    //     y: 20
+    //     height: parent.height - 40
 
-        visible: populate
-        blurBackground: navigationRoot.blurBackground
-    }
+    //     visible: populate
+    //     blurBackground: navigationRoot.blurBackground
+    // }
 
-    SlidePopupButton {
-        id: slideButton
-        slideOn: (populate && !leftControlBar.visible) && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
-        blurBackground: navigationRoot.blurBackground
+    // SlidePopupButton {
+    //     id: slideButton
+    //     slideOn: (populate && !leftControlBar.visible) && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
+    //     blurBackground: navigationRoot.blurBackground
 
-        onClicked: {
-            leftControlBar.visible = true
-        }
-    }
+    //     onClicked: {
+    //         leftControlBar.visible = true
+    //     }
+    // }
 }

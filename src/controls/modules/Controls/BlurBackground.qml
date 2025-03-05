@@ -46,7 +46,7 @@ Item {
         anchors.fill: parent
         sourceItem: blurBackground
         recursive: false
-        live: true
+        live: false
         visible: false
     }
 

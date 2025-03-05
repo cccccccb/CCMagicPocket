@@ -1,6 +1,6 @@
-#include "FramelessWorker.h"
-#include "Frameless.h"
-#include "FramelessWorkerEvent.h"
+#include "framelessworker.h"
+#include "frameless.h"
+#include "framelessworkerevent.h"
 
 #include <QGuiApplication>
 #include <QDebug>

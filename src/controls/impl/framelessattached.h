@@ -6,7 +6,13 @@
 #include <QQuickItem>
 #include <QQmlListProperty>
 
+#ifdef Q_OS_WIN
+class WinFrameless;
+#else
 class Frameless;
+#endif
+
+
 class FramelessAttached : public QObject
 {
     Q_OBJECT
@@ -48,13 +54,19 @@ Q_SIGNALS:
     void enabledChanged();
     void contentMarginsChanged();
 
+#ifndef Q_OS_WIN
 private:
     bool eventFilter(QObject *watched, QEvent *event) override;
+#endif
 
 private:
-    Frameless *m_frameless = nullptr;
-    QVector<QQuickItem *> m_moveUnderContainer;
-    QVector<QQuickItem *> m_moveExcludeContainer;
+#ifdef Q_OS_WIN
+    WinFrameless *          _frameless = nullptr;
+#else
+    Frameless *             _frameless = nullptr;
+    QVector<QQuickItem *>   _moveUnderContainer;
+    QVector<QQuickItem *>   _moveExcludeContainer;
+#endif
 };
 
 QML_DECLARE_TYPEINFO(FramelessAttached, QML_HAS_ATTACHED_PROPERTIES)

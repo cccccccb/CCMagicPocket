@@ -1,4 +1,5 @@
 #include "iconimageprovider.h"
+
 #include <QIcon>
 #include <QPainter>
 #include <QPixmap>

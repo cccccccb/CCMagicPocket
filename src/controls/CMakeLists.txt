@@ -1,14 +1,8 @@
 set(DEPENDES_SOURCE
     impl/edgetoedgemodehelper.cpp
     impl/edgetoedgemodehelper.h
-    impl/frameless.cpp
-    impl/frameless.h
     impl/framelessattached.cpp
     impl/framelessattached.h
-    impl/framelessworker.cpp
-    impl/framelessworker.h
-    impl/framelessworkerevent.cpp
-    impl/framelessworkerevent.h
     impl/iconimageprovider.cpp
     impl/iconimageprovider.h
     impl/mpqmlinstance.cpp
@@ -28,6 +22,20 @@ set(DEPENDES_SOURCE
     mp_plugin.cpp
     mp_plugin.h
 )
+
+if (WIN32)
+    list(APPEND DEPENDES_SOURCE
+        impl/frameless_win.h impl/frameless_win.cpp
+    )
+else()
+    list(APPEND DEPENDES_SOURCE
+        impl/frameless.h impl/frameless.cpp
+        impl/framelessworker.cpp
+        impl/framelessworker.h
+        impl/framelessworkerevent.cpp
+        impl/framelessworkerevent.h
+    )
+endif()
 
 set(REGISTER_QML
     modules/Controls/CheckedAnimateButton.qml

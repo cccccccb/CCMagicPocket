@@ -4,6 +4,8 @@ layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
+    float adjustX;
+    float adjustY;
 };
 layout(binding = 1) uniform sampler2D source;
 
@@ -43,9 +45,32 @@ vec3 invertColor(vec3 c)
     return c;
 }
 
+float distanceEllipse(vec2 pos, vec2 center, float a, float b)
+{
+    vec2 offset = pos - center;
+    return (offset.x * offset.x) / (a * a) + (offset.y * offset.y) / (b * b);
+}
+
 void main() {
     vec4 p = texture(source, qt_TexCoord0);
     vec3 g = rgb2hsv(p.xyz);
     vec3 c = hsv2rgb(invertColor(g));
-    fragColor = qt_Opacity * vec4(c, p.w);
+
+    float d = 0.0;
+    float edge = 0.01;
+    if (qt_TexCoord0.x < adjustX && qt_TexCoord0.y < adjustY) {
+        d = distanceEllipse(qt_TexCoord0, vec2(adjustX, adjustY), adjustX, adjustY);
+        edge = adjustX < 0.5 ? fwidth(qt_TexCoord0.y - vec2(adjustX, adjustY).y) / 1.4 : fwidth(qt_TexCoord0.x - vec2(adjustX, adjustY).x) / 1.4;
+    } else if (qt_TexCoord0.x > 1.0 - adjustX && qt_TexCoord0.y < adjustY) {
+        d = distanceEllipse(qt_TexCoord0, vec2(1.0 - adjustX, adjustY), adjustX, adjustY);
+        edge = adjustX < 0.5 ? fwidth(qt_TexCoord0.y - vec2(1.0 - adjustX, adjustY).y) / 1.4 : fwidth(qt_TexCoord0.x - vec2(1.0 - adjustX, adjustY).x) / 1.4;
+    } else if (qt_TexCoord0.x < adjustX && qt_TexCoord0.y > 1.0 - adjustY) {
+        d = distanceEllipse(qt_TexCoord0, vec2(adjustX, 1.0 - adjustY), adjustX, adjustY);
+        edge = adjustX < 0.5 ? fwidth(qt_TexCoord0.y - vec2(adjustX, 1.0 - adjustY).y) / 1.4 : fwidth(qt_TexCoord0.x - vec2(adjustX, 1.0 - adjustY).x) / 1.4;
+    } else if (qt_TexCoord0.x > 1.0 - adjustX && qt_TexCoord0.y > 1.0 - adjustY) {
+        d = distanceEllipse(qt_TexCoord0, vec2(1.0 - adjustX, 1.0 - adjustY), adjustX, adjustY);
+        edge = adjustX < 0.5 ? fwidth(qt_TexCoord0.y - vec2(1.0 - adjustX, 1.0 - adjustY).y) / 1.4 : fwidth(qt_TexCoord0.x - vec2(1.0 - adjustX, 1.0 - adjustY).x) / 1.4;
+    }
+
+    fragColor = vec4(c, p.w) * step(d, 1.0) * smoothstep(d, 1.0 + edge, 1.0) * qt_Opacity;
 }

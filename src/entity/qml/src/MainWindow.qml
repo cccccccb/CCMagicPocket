@@ -21,11 +21,9 @@ AppStartupItem {
             id: mainPane
             z: -100
             anchors.fill: parent
-            anchors.margins: showShadow ? Style.item.marginLevel1 : 0
             backgroundImagePath: Qt.url("../../res/default_wallpaper_2.jpg")
         }
     }
-
 
     AppStartupComponent {
         id: centerPaneComponent
@@ -43,7 +41,6 @@ AppStartupItem {
 
         NavigationBarGroup {
             anchors.fill: parent
-            anchors.margins: AppStartupItem.mainPane.anchors.margins
             blurBackground: AppStartupItem.mainPane
         }
     }
@@ -51,7 +48,6 @@ AppStartupItem {
     onPopulateChanged: {
         if (populate) {
             Window.window.Frameless.canWindowResize = true
-            Window.window.Frameless.contentMargins = AppStartupItem.mainPane.anchors.margins
         }
     }
 }

@@ -100,6 +100,7 @@ Item {
                     sourceComponent: ShaderEffectSource {
                         sourceItem: visibleItem
                         hideSource: true
+                        live: false
                     }
                 }
             }
