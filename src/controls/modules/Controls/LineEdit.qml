@@ -37,20 +37,16 @@ TextField {
                 Rectangle {
                     id: _blurRect
                     anchors.fill: parent
-                    visible: false
                     color: Style.item.searchEdit.edittingBackgroundColor
                     radius: Style.item.searchEdit.radius
                     border { width: 1; color: Qt.rgba(0.8, 0.8, 0.8, 0.7) }
-                }
 
-                MultiEffect {
-                    source: _blurRect
-                    anchors.fill: _blurRect
-                    autoPaddingEnabled: true
-                    shadowEnabled: true
-                    shadowBlur: 0.4
-                    shadowOpacity: 0.2
-                    shadowColor: Qt.rgba(0, 0, 0, 1)
+                    OuterShadow {
+                        anchors.fill: _blurRect
+                        shadowRadius: 20
+                        shadowColor: Qt.rgba(0, 0, 0, 1)
+                        cornerRadius: _blurRect.radius
+                    }
                 }
             }
         }

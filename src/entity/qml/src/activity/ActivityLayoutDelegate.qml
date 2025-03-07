@@ -103,17 +103,13 @@ Item {
                         live: false
                     }
                 }
-            }
 
-            MultiEffect {
-                source: sourceEffect
-                anchors.fill: sourceEffect
-                shadowEnabled: true
-                shadowColor: Qt.color("#40000000")
-                shadowBlur: 0.4
-                blurMultiplier: 0.6
-                brightness: contentItem.scale - 0.95 > 0 ? 0 : 2 * (contentItem.scale - 0.95)
-                blurMax: 48
+                OuterShadow {
+                    shadowColor: Qt.color("#40000000")
+                    shadowRadius: 20
+                    anchors.fill: sourceEffect
+                    cornerRadius: sourceEffect.radius
+                }
             }
         }
     }

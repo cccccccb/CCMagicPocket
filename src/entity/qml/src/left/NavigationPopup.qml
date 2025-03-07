@@ -37,20 +37,17 @@ Popup {
 
             BlurBackground {
                 id: blurBack
-                visible: false
                 anchors.fill: parent
                 radius: 12
+
+                OuterShadow {
+                    anchors.fill: parent
+                    cornerRadius: blurBack.radius
+                    shadowColor: Qt.color("#F0000000")
+                    shadowRadius: 20
+                }
             }
 
-            MultiEffect {
-                source: blurBack
-                anchors.fill: blurBack
-
-                shadowEnabled: true
-                shadowColor: Qt.color("#F0000000")
-                shadowBlur: 0.6
-                shadowOpacity: 0.8
-            }
 
             Rectangle {
                 id: _blurItem

@@ -19,7 +19,7 @@ Item {
         id: icon
 
         anchors.centerIn: parent
-        source: MagicPocket.toTokIconUrl(iconName, iconColor, hovered, pressed)
+        source: MagicPocket.toMPIconUrl(iconName, iconColor, hovered, pressed)
         sourceSize: Qt.size(iconWidth, iconHeight)
         width: iconWidth
         height: iconHeight

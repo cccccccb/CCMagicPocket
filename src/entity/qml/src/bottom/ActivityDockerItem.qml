@@ -70,23 +70,23 @@ Item {
             Image {
                 id: _blurItem
                 anchors.fill: parent
-                visible: false
+                // visible: false
 
                 source: iconSource
                 fillMode: Image.PreserveAspectFit
                 sourceSize: Qt.size(68, 68)
             }
 
-            MultiEffect {
-                source: _blurItem
-                anchors.fill: _blurItem
+            // MultiEffect {
+            //     source: _blurItem
+            //     anchors.fill: _blurItem
 
-                shadowEnabled: true
-                shadowColor: Qt.color("#A0000000")
-                shadowBlur: 0.8
-                shadowOpacity: 0.4
-                shadowVerticalOffset: 4
-            }
+            //     shadowEnabled: true
+            //     shadowColor: Qt.color("#A0000000")
+            //     shadowBlur: 0.8
+            //     shadowOpacity: 0.4
+            //     shadowVerticalOffset: 4
+            // }
         }
 
         Loader {

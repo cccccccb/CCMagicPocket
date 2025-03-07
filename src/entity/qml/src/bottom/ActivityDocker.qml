@@ -8,7 +8,7 @@ import CCMagicPocket
 Control {
     id: root
     property bool slideOn: false
-    property alias blurBackground : blurBack.blurBackground
+    property alias blurBackground: blurBack.blurBackground
     property alias permanentModel: permanentView.model
     property alias activeModel: activeView.model
 
@@ -23,21 +23,17 @@ Control {
             id: _blurItem
             anchors.fill: parent
 
-            visible: false
             color: Qt.lighter("#A0A0A0")
             border.color: "#E0E0E0"
             border.width: 1
             radius: 12
-        }
 
-        MultiEffect {
-            source: _blurItem
-            anchors.fill: _blurItem
-
-            shadowEnabled: true
-            shadowColor: Qt.color("#80000000")
-            shadowBlur: 0.8
-            shadowVerticalOffset: 4
+            OuterShadow {
+                anchors.fill: parent
+                cornerRadius: _blurItem.radius
+                shadowColor: Qt.color("#80000000")
+                shadowRadius: 20
+            }
         }
 
         BlurBackground {

@@ -58,7 +58,6 @@ Control {
             id: _backRect
 
             anchors.fill: parent
-            visible: !_hoveredIn
             color: pressedIn ? Qt.darker(root.backgroundColor, 1.2) : hovered ? Qt.lighter(root.backgroundColor, 1.2) : root.backgroundColor
             border.color: Style.item.extraStyle.miniButtonBackgroundBorderColor
             border.width: Style.item.borderWidth
@@ -75,12 +74,10 @@ Control {
             active: _hoveredIn
             anchors.fill: _backRect
 
-            sourceComponent: MultiEffect {
-                source: _backRect
-                autoPaddingEnabled: true
-                shadowEnabled: true
-                shadowBlur: 0.4
-                shadowColor: Qt.color("#CC000000")
+            sourceComponent: OuterShadow {
+                cornerRadius: _backRect.radius
+                shadowColor: Qt.color("#CC0000000")
+                shadowRadius: 6
             }
         }
     }

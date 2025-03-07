@@ -29,9 +29,14 @@ void MPQmlInstance::setActivityManager(ActivityManager *activityManager)
     Q_EMIT activityManagerChanged();
 }
 
-QUrl MPQmlInstance::toTokIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed)
+QUrl MPQmlInstance::toMPIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed)
 {
-    return IconImageProvider::toTokIconUrl(name, color, hovered, pressed);
+    return IconImageProvider::toMPIconUrl(name, color, hovered, pressed);
+}
+
+QUrl MPQmlInstance::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor)
+{
+    return ShadowImageProvider::toMPShadowUrl(shadowSize, cornerHRadius, cornerVRadius, shadowRadius, shadowColor);
 }
 
 bool MPQmlInstance::isAndroid() const

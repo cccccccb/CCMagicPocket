@@ -82,12 +82,13 @@ void MPControlExtension::registerTypes(const char *uri)
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/ClipAreaItem.qml"), uri, 1, 0, "ClipAreaItem");
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/InnerShadow.qml"), uri, 1, 0, "InnerShadow");
     qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/CustomToolTip.qml"), uri, 1, 0, "CustomToolTip");
+    qmlRegisterType(QUrl(qmlUriPrefix + "/Controls/OuterShadow.qml"), uri, 1, 0, "OuterShadow");
 }
 
 void MPControlExtension::initializeEngine(QQmlEngine *engine, const char *uri)
 {
     engine->addImageProvider("mp.icons", new IconImageProvider());
-    engine->imageProvider("mp.icons");
+    engine->addImageProvider("mp.shadow", new ShadowImageProvider());
 
     if (EdgeToEdgeModeHelper *edgeToEdge = engine->singletonInstance<EdgeToEdgeModeHelper *>(qmlTypeId(uri, 1, 0, "EdgeToEdge"))) {
         edgeToEdge->enable();

@@ -79,20 +79,17 @@ CustomButton {
             id: _blurItem
             anchors.fill: parent
 
-            visible: false
             color: Qt.lighter("#A0A0A0A0")
             border.color: "#A0F0F0F0"
             border.width: 1
             radius: root.width / 2
-        }
 
-        MultiEffect {
-            source: _blurItem
-            anchors.fill: _blurItem
-
-            shadowEnabled: true
-            shadowColor: Qt.color("#AA000000")
-            shadowBlur: 0.6
+            OuterShadow {
+                anchors.fill: parent
+                cornerRadius: _blurItem.radius
+                shadowColor: Qt.color("#AA000000")
+                shadowRadius: 20
+            }
         }
 
         BlurBackground {

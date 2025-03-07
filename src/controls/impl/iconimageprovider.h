@@ -11,12 +11,17 @@ class IconImageProvider : public QQuickImageProvider
 public:
     IconImageProvider();
 
-    static QUrl toTokIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
-    static QString getNameFromQueryItem(const QString &query);
-    static QColor getColorFromQueryItem(const QString &query);
-    static bool getBoolFromQueryItem(const QString &key, const QString &query);
-
+    static QUrl toMPIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
     QPixmap requestPixmap(const QString &id, QSize *size, const QSize &requestedSize) override;
+};
+
+class ShadowImageProvider : public QQuickImageProvider
+{
+public:
+    ShadowImageProvider();
+
+    static QUrl toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor);
+    QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
 };
 
 #endif // ICONIMAGEPROVIDER_H

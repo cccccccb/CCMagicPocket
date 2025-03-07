@@ -24,26 +24,22 @@ Control {
             id: _blurItem
             anchors.fill: parent
 
-            visible: false
             color: Qt.lighter("#A0A0A0")
             border.color: "#E0E0E0"
             border.width: 1
             radius: 8
-        }
 
-        MultiEffect {
-            source: _blurItem
-            anchors.fill: _blurItem
-
-            shadowEnabled: true
-            shadowColor: Qt.color("#F0000000")
-            shadowBlur: 0.6
+            OuterShadow {
+                anchors.fill: parent
+                cornerRadius: _blurItem.radius
+                shadowColor: Qt.color("#F0000000")
+                shadowRadius: 20
+            }
         }
 
         BlurBackground {
             id: blurBack
             anchors.fill: parent
-
             radius: 8
         }
 

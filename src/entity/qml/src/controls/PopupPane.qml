@@ -19,21 +19,18 @@ Control {
         sourceComponent: Item {
             Rectangle {
                 id: _backRect
-                visible: false
                 anchors.fill: parent
                 color: root.backgroundColor
                 radius: 8
                 border.color: Qt.rgba(0, 0, 0, 0.2)
                 border.width: Style.item.borderWidth
-            }
 
-            MultiEffect {
-                source: _backRect
-                anchors.fill: _backRect
-                autoPaddingEnabled: true
-                shadowEnabled: true
-                shadowBlur: 0.4
-                shadowColor: Qt.rgba(1, 1, 1, 0.4)
+                OuterShadow {
+                    anchors.fill: parent
+                    cornerRadius: _backRect.radius
+                    shadowColor: Qt.rgba(1, 1, 1, 0.4)
+                    shadowRadius: 20
+                }
             }
         }
     }

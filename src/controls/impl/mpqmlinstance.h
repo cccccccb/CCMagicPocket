@@ -24,7 +24,9 @@ public:
     void setActivityManager(ActivityManager *activityManager);
 
     bool isAndroid() const;
-    Q_INVOKABLE QUrl toTokIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
+
+    Q_INVOKABLE QUrl toMPIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
+    Q_INVOKABLE QUrl toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor);
 
 Q_SIGNALS:
     void activityManagerChanged();

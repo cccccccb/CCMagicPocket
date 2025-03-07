@@ -46,8 +46,9 @@ set(REGISTER_QML
     modules/Controls/BlurBackground.qml
     modules/Controls/ClipAreaItem.qml
     modules/Controls/InnerShadow.qml
-    modules/Style/Style.qml
     modules/Controls/CustomToolTip.qml
+    modules/Controls/OuterShadow.qml
+    modules/Style/Style.qml
 )
 
 set(PRIVATE_QML
@@ -57,6 +58,7 @@ set(PRIVATE_QML
     modules/Style/mobile/CustomButtonStyle.qml
     modules/Style/mobile/MobileStyle.qml
     modules/Style/mobile/SearchEditStyle.qml
+    modules/Controls/ShadowBase.qml
     modules/Utils/functional.js
 )
 
@@ -100,6 +102,7 @@ target_link_libraries(MPControlExtension PRIVATE
     Qt::Quick
     Qt::QuickPrivate
     zip
+    fast_blur
 )
 
 target_include_directories(MPControlExtension PRIVATE
