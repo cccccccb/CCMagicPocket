@@ -30,22 +30,6 @@ AppPreloadItem {
             onClicked: {
                 preloadCountdown.running = false
             }
-
-            Component.onCompleted: {
-                root.window.Frameless.moveExclude.push(skipButton)
-            }
-
-            Component.onDestruction: {
-                root.window.Frameless.moveExclude = Array.from(root.window.Frameless.moveExclude).filter(r => r !== skipButton)
-            }
-        }
-
-        Component.onCompleted: {
-            root.window.Frameless.moveUnder.push(overlay)
-        }
-
-        Component.onDestruction: {
-            root.window.Frameless.moveUnder = Array.from(root.window.Frameless.moveUnder).filter(r => r !== overlay)
         }
     }
 
@@ -57,17 +41,13 @@ AppPreloadItem {
         readonly property int width: 1000
         readonly property int height: 760
         readonly property string title: "Magic Pocket"
-        readonly property color color: Qt.rgba(0.8, 0.8, 0.8, 0.8)
+        readonly property color color: "transparent"
+        readonly property int flags: Qt.FramelessWindowHint | Qt.Window
     }
 
     Countdown {
         id: preloadCountdown
         interval: 10
         running: root.visible
-    }
-
-   onWindowChanged: {
-        root.window.Frameless.enabled = true
-        root.window.Frameless.canWindowResize = false
     }
 }

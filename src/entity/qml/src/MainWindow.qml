@@ -68,6 +68,7 @@ AppStartupItem {
 
     onPopulateChanged: {
         if (populate) {
+            Window.window.Frameless.enabled = true
             Window.window.Frameless.canWindowResize = true
         }
     }
