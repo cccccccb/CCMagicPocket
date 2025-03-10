@@ -56,8 +56,8 @@ AppPreloadItem {
         readonly property bool visible: true
         readonly property int width: 1000
         readonly property int height: 760
-        readonly property string title: "MagicPocket"
-        readonly property color color: "transparent"
+        readonly property string title: "Magic Pocket"
+        readonly property color color: Qt.rgba(0.8, 0.8, 0.8, 0.8)
     }
 
     Countdown {

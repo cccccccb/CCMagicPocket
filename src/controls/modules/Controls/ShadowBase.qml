@@ -9,6 +9,7 @@ Item {
     property real offsetX: 0
     property real offsetY: 0
     property color shadowColor: "black"
+    property bool surround: true
 
     Loader {
         property int _cornerHRadius: Math.min(parent.width / 2, cornerRadius)
@@ -26,10 +27,11 @@ Item {
         sourceComponent: BorderImage {
             border.left: shadowRadius + _cornerHRadius
             border.right: shadowRadius + _cornerHRadius
-            border.top: shadowRadius + _cornerVRadius
-            border.bottom: shadowRadius + _cornerVRadius
+            border.top: shadowRadius + _cornerHRadius
+            border.bottom: shadowRadius + _cornerHRadius
 
-            source: MagicPocket.toMPShadowUrl(_shadowSize, _cornerHRadius, _cornerVRadius, shadowRadius, shadowColor)
+            source: MagicPocket.toMPShadowUrl(_shadowSize, _cornerHRadius, _cornerVRadius, shadowRadius,
+                                              shadowColor, surround, offsetX, offsetY)
         }
     }
 }

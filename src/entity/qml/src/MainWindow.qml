@@ -33,26 +33,26 @@ AppStartupItem {
             parent: AppStartupItem.mainPane
             anchors.fill: parent
 
-            Rectangle {
-                width: 600
-                height: 600
-                anchors.centerIn: parent
+            // Rectangle {
+            //     width: 600
+            //     height: 600
+            //     anchors.centerIn: parent
 
-                Rectangle {
-                    width: 200
-                    height: 200
-                    color: "white"
-                    radius: 8
-                    anchors.centerIn: parent
+            //     Rectangle {
+            //         width: 200
+            //         height: 200
+            //         color: "white"
+            //         radius: 8
+            //         anchors.centerIn: parent
 
-                    OuterShadow {
-                        anchors.fill: parent
-                        shadowColor: Qt.rgba(0, 0, 0, 0.5)
-                        cornerRadius: 8
-                        shadowRadius: 20
-                    }
-                }
-            }
+            //         OuterShadow {
+            //             anchors.fill: parent
+            //             shadowColor: Qt.rgba(0, 0, 0, 0.5)
+            //             cornerRadius: 8
+            //             shadowRadius: 20
+            //         }
+            //     }
+            // }
         }
     }
 

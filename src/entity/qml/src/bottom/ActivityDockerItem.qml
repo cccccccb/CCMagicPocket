@@ -54,6 +54,13 @@ Item {
                     }
                 }
             }
+
+            OuterShadow {
+                anchors.fill: parent
+                shadowColor: Qt.color("#60000000")
+                cornerRadius: parent.radius
+                offsetY: 4
+            }
         }
 
         contentItem: Item {
@@ -70,23 +77,11 @@ Item {
             Image {
                 id: _blurItem
                 anchors.fill: parent
-                // visible: false
 
                 source: iconSource
                 fillMode: Image.PreserveAspectFit
                 sourceSize: Qt.size(68, 68)
             }
-
-            // MultiEffect {
-            //     source: _blurItem
-            //     anchors.fill: _blurItem
-
-            //     shadowEnabled: true
-            //     shadowColor: Qt.color("#A0000000")
-            //     shadowBlur: 0.8
-            //     shadowOpacity: 0.4
-            //     shadowVerticalOffset: 4
-            // }
         }
 
         Loader {

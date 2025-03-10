@@ -76,7 +76,7 @@ Control {
 
             sourceComponent: OuterShadow {
                 cornerRadius: _backRect.radius
-                shadowColor: Qt.color("#CC0000000")
+                shadowColor: Qt.color("#C0000000")
                 shadowRadius: 6
             }
         }

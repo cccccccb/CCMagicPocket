@@ -3,11 +3,13 @@
 
 #include <QDir>
 #include <QIcon>
+#include <QHash>
 #include <QPainter>
 #include <QPixmap>
 #include <QPixmapCache>
 #include <QStandardPaths>
 #include <QUrlQuery>
+#include <QThreadPool>
 
 IconImageProvider::IconImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Pixmap)
@@ -111,12 +113,14 @@ QPixmap IconImageProvider::requestPixmap(const QString &id, QSize *size, const Q
 }
 
 ShadowImageProvider::ShadowImageProvider()
-    : QQuickImageProvider(QQuickImageProvider::Image/*, QQuickImageProvider::ForceAsynchronousImageLoading*/)
+    : QQuickImageProvider(QQuickImageProvider::Image)
+    , mCacheSavedThreadPool(new QThreadPool(this))
 {
-
+    mCacheSavedThreadPool->setMaxThreadCount(2);
 }
 
-QUrl ShadowImageProvider::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor)
+QUrl ShadowImageProvider::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
+                                        const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY)
 {
     QUrl url;
     url.setScheme("image");
@@ -128,13 +132,16 @@ QUrl ShadowImageProvider::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, q
     args.addQueryItem("cornerVRadius", QString::number(cornerVRadius));
     args.addQueryItem("shadowRadius", QString::number(shadowRadius));
     args.addQueryItem("shadowColor", shadowColor.name(QColor::HexArgb));
+    args.addQueryItem("surround", QString::number(shadowRadius ? 1 : 0));
+    args.addQueryItem("offsetX", QString::number(offsetX));
+    args.addQueryItem("offsetY", QString::number(offsetY));
 
     url.setQuery(args);
 
     return url;
 }
 
-static QString generateLocalCachedFileName(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius)
+static QString generateLocalCachedKey(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius)
 {
     return QString::number(shadowSize) + "_" +
            QString::number(cornerHRadius) + "_" +
@@ -142,10 +149,13 @@ static QString generateLocalCachedFileName(qreal shadowSize, qreal cornerHRadius
            QString::number(shadowRadius);
 }
 
-static QString shadowCachedDirPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/shadow";
+static QString shadowCachedDirPath;
 
 static bool findShadowFromLocalCached(const QString &fileName, QImage &result)
 {
+    if (shadowCachedDirPath.isEmpty())
+         shadowCachedDirPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/shadow";
+
     QDir shadowCachedDir(shadowCachedDirPath);
     if (!shadowCachedDir.exists()) {
         return false;
@@ -159,14 +169,19 @@ static bool findShadowFromLocalCached(const QString &fileName, QImage &result)
     return !result.isNull();
 }
 
-static void saveShadowIntoLocalCached(const QString &fileName, const QImage &result)
+static void saveShadowIntoLocalCached(const QString &fileName, QThreadPool *threadPool, const QImage &result)
 {
+    if (result.isNull())
+        return;
+
     QDir shadowCachedDir(shadowCachedDirPath);
     if (!shadowCachedDir.exists()) {
         shadowCachedDir.mkpath(shadowCachedDirPath);
     }
 
-    result.save(shadowCachedDirPath + "/" + fileName, "PNG");
+    threadPool->start([=]() {
+        result.save(shadowCachedDirPath + "/" + fileName, "PNG");
+    });
 }
 
 static QVector<int> boxesForGauss(double sigma, int size)
@@ -256,7 +271,7 @@ static void boxBlurForV(uint32_t *origin, uint32_t *dest, int width, int height,
         for (int j = height - radius; j < height; ++j) {
             val += lv - origin[li];
             dest[ti] = qRound(val * iarr);
-            li+=width;
+            li += width;
             ti += width;
         }
     }
@@ -307,12 +322,19 @@ QImage ShadowImageProvider::requestImage(const QString &id, QSize *size, const Q
     qreal cornerHRadius = getQRealFromQueryItem("cornerHRadius", id);
     qreal cornerVRadius = getQRealFromQueryItem("cornerVRadius", id);
     qreal shadowRadius = getQRealFromQueryItem("shadowRadius", id);
+    bool surround = getBoolFromQueryItem("surround", id);
+    qreal offsetX = getQRealFromQueryItem("offsetX", id);
+    qreal offsetY = getQRealFromQueryItem("offsetY", id);
 
     QImage target;
-    const QString &localCachedFileName = generateLocalCachedFileName(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
-    if (!findShadowFromLocalCached(localCachedFileName, target)) {
-        target = createShadowImage(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
-        // saveShadowIntoLocalCached(localCachedFileName, target);
+    const QString &localCachedKey = generateLocalCachedKey(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
+    if (!findShadowFromCurrentCached(localCachedKey, target)) {
+        if (!findShadowFromLocalCached(localCachedKey, target)) {
+            target = createShadowImage(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
+            saveShadowIntoLocalCached(localCachedKey, mCacheSavedThreadPool, target);
+        }
+
+        saveShadowIntoCurrentCached(localCachedKey, target);
     }
 
     QColor shadowColor = getColorFromQueryItem("shadowColor", id);
@@ -321,8 +343,35 @@ QImage ShadowImageProvider::requestImage(const QString &id, QSize *size, const Q
     painter.fillRect(target.rect(), shadowColor);
     painter.end();
 
+    if (surround) {
+        painter.begin(&target);
+        painter.translate(-offsetX, -offsetY);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setCompositionMode(QPainter::CompositionMode_Clear);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.drawRoundedRect(target.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius), cornerHRadius, cornerVRadius);
+        painter.end();
+    }
+
     if (size)
         *size = target.size();
 
     return target;
+}
+
+bool ShadowImageProvider::findShadowFromCurrentCached(const QString &key, QImage &result)
+{
+    QImage cached = mCachedImages.value(key);
+
+    if (cached.isNull())
+        return false;
+
+    result = cached;
+    return true;
+}
+
+void ShadowImageProvider::saveShadowIntoCurrentCached(const QString &key, const QImage &target)
+{
+    mCachedImages.insert(key, target);
 }

@@ -34,9 +34,10 @@ QUrl MPQmlInstance::toMPIconUrl(const QString &name, const QColor &color, bool h
     return IconImageProvider::toMPIconUrl(name, color, hovered, pressed);
 }
 
-QUrl MPQmlInstance::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor)
+QUrl MPQmlInstance::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
+                                  const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY)
 {
-    return ShadowImageProvider::toMPShadowUrl(shadowSize, cornerHRadius, cornerVRadius, shadowRadius, shadowColor);
+    return ShadowImageProvider::toMPShadowUrl(shadowSize, cornerHRadius, cornerVRadius, shadowRadius, shadowColor, surround, offsetX, offsetY);
 }
 
 bool MPQmlInstance::isAndroid() const

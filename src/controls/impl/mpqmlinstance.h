@@ -26,7 +26,8 @@ public:
     bool isAndroid() const;
 
     Q_INVOKABLE QUrl toMPIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed);
-    Q_INVOKABLE QUrl toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius, const QColor &shadowColor);
+    Q_INVOKABLE QUrl toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
+                                   const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY);
 
 Q_SIGNALS:
     void activityManagerChanged();
