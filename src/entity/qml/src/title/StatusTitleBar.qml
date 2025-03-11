@@ -97,16 +97,19 @@ Control {
 
                 function updateDateTime() {
                     var date = new Date()
+
                     dayText.text = Qt.formatDateTime(date, "MMM-dd")
                     timeText.text = Qt.formatDateTime(date, "hh:mm")
+
+                    dateTimer.interval = 60 - date.getSeconds()
+                    dateTimer.start()
                 }
 
                 Timer {
-                    repeat: true
-                    interval: 60 * 1000
-                    running: true
+                    id: dateTimer
+                    repeat: false
 
-                    onTriggered: updateDateTime()
+                    onTriggered: parent.updateDateTime()
                 }
 
                 Component.onCompleted: updateDateTime()
