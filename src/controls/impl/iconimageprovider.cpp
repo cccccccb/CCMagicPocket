@@ -10,6 +10,7 @@
 #include <QStandardPaths>
 #include <QUrlQuery>
 #include <QThreadPool>
+#include <QPainterPath>
 
 IconImageProvider::IconImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Pixmap)
@@ -120,7 +121,7 @@ ShadowImageProvider::ShadowImageProvider()
 }
 
 QUrl ShadowImageProvider::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
-                                        const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY)
+                                        const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY, bool inner)
 {
     QUrl url;
     url.setScheme("image");
@@ -135,18 +136,20 @@ QUrl ShadowImageProvider::toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, q
     args.addQueryItem("surround", QString::number(shadowRadius ? 1 : 0));
     args.addQueryItem("offsetX", QString::number(offsetX));
     args.addQueryItem("offsetY", QString::number(offsetY));
+    args.addQueryItem("inner", QString::number(inner ? 1 : 0));
 
     url.setQuery(args);
 
     return url;
 }
 
-static QString generateLocalCachedKey(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius)
+static QString generateLocalCachedKey(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius,
+                                      qreal shadowRadius, bool inner)
 {
     return QString::number(shadowSize) + "_" +
            QString::number(cornerHRadius) + "_" +
-           QString::number(cornerVRadius) +"_" +
-           QString::number(shadowRadius);
+           QString::number(cornerVRadius) + "_" +
+           QString::number(shadowRadius) + "_" + QString::number(inner ? 1 : 0);
 }
 
 static QString shadowCachedDirPath;
@@ -294,10 +297,12 @@ static void doBoxBlur(uint32_t *target, int width, int height, int radius)
     boxBlur(reinterpret_cast<uint32_t *>(target), tmpShadowBuffer.data(), width, height, (boxes[2] - 1) / 2);
 }
 
-static QImage createShadowImage(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius)
+static QImage createShadowImage(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
+                                qreal offsetX, qreal offsetY, bool inner)
 {
-    QImage shadowOrigin(qRound(shadowSize), qRound(shadowSize), QImage::Format_ARGB32);
-    shadowOrigin.fill(Qt::transparent);
+    QImage shadowOrigin(inner ? qRound(shadowSize) + 2 * shadowRadius : qRound(shadowSize),
+                        inner ? qRound(shadowSize) + 2 * shadowRadius : qRound(shadowSize), QImage::Format_ARGB32);
+    shadowOrigin.fill(inner ? Qt::black : Qt::transparent);
 
     QPainter painter(&shadowOrigin);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -305,14 +310,23 @@ static QImage createShadowImage(qreal shadowSize, qreal cornerHRadius, qreal cor
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
 
-    painter.drawRoundedRect(shadowOrigin.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius), cornerHRadius, cornerVRadius);
+    if (inner) {
+        painter.setCompositionMode(QPainter::CompositionMode_Clear);
+        painter.translate(-offsetX, -offsetY);
+    }
+
+    if (cornerHRadius == 0 && cornerHRadius == 0) {
+        painter.drawRect(shadowOrigin.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius));
+    } else {
+        painter.drawRoundedRect(shadowOrigin.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius), cornerHRadius, cornerVRadius);
+    }
     painter.end();
 
     auto originData = shadowOrigin.bits();
     QScopedArrayPointer<uint32_t> tmpData(new uint32_t[shadowOrigin.width() * shadowOrigin.height()]);
     uchar *tmpCharData = reinterpret_cast<uchar *>(tmpData.data());
 
-    fast_gaussian_blur(originData, tmpCharData, shadowSize, shadowSize, 4, shadowRadius / 2, 3, kWrap);
+    fast_gaussian_blur(originData, tmpCharData, shadowOrigin.width(), shadowOrigin.height(), 4, shadowRadius / 2, 3, kWrap);
     return shadowOrigin;
 }
 
@@ -325,34 +339,78 @@ QImage ShadowImageProvider::requestImage(const QString &id, QSize *size, const Q
     bool surround = getBoolFromQueryItem("surround", id);
     qreal offsetX = getQRealFromQueryItem("offsetX", id);
     qreal offsetY = getQRealFromQueryItem("offsetY", id);
+    bool inner = getBoolFromQueryItem("inner", id);
 
     QImage target;
-    const QString &localCachedKey = generateLocalCachedKey(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
+    const QString &localCachedKey = generateLocalCachedKey(shadowSize, cornerHRadius, cornerVRadius,
+                                                           shadowRadius, inner);
     if (!findShadowFromCurrentCached(localCachedKey, target)) {
         if (!findShadowFromLocalCached(localCachedKey, target)) {
-            target = createShadowImage(shadowSize, cornerHRadius, cornerVRadius, shadowRadius);
+            target = createShadowImage(shadowSize, cornerHRadius, cornerVRadius, shadowRadius, offsetX, offsetY, inner);
             saveShadowIntoLocalCached(localCachedKey, mCacheSavedThreadPool, target);
         }
 
         saveShadowIntoCurrentCached(localCachedKey, target);
     }
 
-    QColor shadowColor = getColorFromQueryItem("shadowColor", id);
-    QPainter painter(&target);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    painter.fillRect(target.rect(), shadowColor);
-    painter.end();
+    QPainter painter;
 
-    if (surround) {
+    if (surround && !inner) {
         painter.begin(&target);
         painter.translate(-offsetX, -offsetY);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setCompositionMode(QPainter::CompositionMode_Clear);
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::black);
-        painter.drawRoundedRect(target.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius), cornerHRadius, cornerVRadius);
+
+        const QRect roundedRect = target.rect().adjusted(shadowRadius, shadowRadius, -shadowRadius, -shadowRadius);
+        if (cornerHRadius == 0 && cornerHRadius == 0) {
+            painter.drawRect(roundedRect);
+        } else {
+            painter.drawRoundedRect(roundedRect, cornerHRadius, cornerVRadius);
+        }
+
         painter.end();
+    } else if (inner) {
+        QImage innerImage(shadowSize, shadowSize, QImage::Format_ARGB32_Premultiplied);
+        innerImage.fill(Qt::transparent);
+
+        painter.begin(&innerImage);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        QPainterPath clipPath;
+        if (cornerHRadius == 0 && cornerHRadius == 0) {
+            clipPath.addRect(target.rect());
+        } else {
+            clipPath.addRoundedRect(target.rect(), cornerHRadius, cornerVRadius);
+        }
+        painter.setClipPath(clipPath);
+
+        painter.translate(-offsetX, -offsetY);
+        QRect targetRect = target.rect();
+        targetRect.moveCenter(innerImage.rect().center());
+
+        painter.drawImage(targetRect, target);
+
+        painter.setCompositionMode(QPainter::CompositionMode_Clear);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+
+        QRect clearRect(0, 0, 1, 1);
+        clearRect.moveCenter(innerImage.rect().center());
+        painter.drawRect(clearRect);
+
+        painter.end();
+
+        target = innerImage;
     }
+
+    QColor shadowColor = getColorFromQueryItem("shadowColor", id);
+
+    painter.begin(&target);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(target.rect(), shadowColor);
+    painter.end();
 
     if (size)
         *size = target.size();

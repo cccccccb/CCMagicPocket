@@ -79,35 +79,37 @@ Control {
             Row {
                 id: timerItem
                 anchors.centerIn: parent
-                spacing: 4
+                spacing: 6
 
                 Text {
+                    id: dayText
                     font.bold: true
                     font.pointSize: Style.item.fontSize.t3
                     color: Style.item.hightTextColor
-
-                    Timer {
-                        repeat: true
-                        interval: 500
-                        running: true
-
-                        onTriggered: parent.text = Qt.formatDateTime(new Date(), "MMM-dd")
-                    }
                 }
 
                 Text {
+                    id: timeText
                     font.bold: true
                     font.pointSize: Style.item.fontSize.t3
                     color: Style.item.hightTextColor
-
-                    Timer {
-                        repeat: true
-                        interval: 500
-                        running: true
-
-                        onTriggered: parent.text = Qt.formatDateTime(new Date(), "hh:mm:ss")
-                    }
                 }
+
+                function updateDateTime() {
+                    var date = new Date()
+                    dayText.text = Qt.formatDateTime(date, "MMM-dd")
+                    timeText.text = Qt.formatDateTime(date, "hh:mm")
+                }
+
+                Timer {
+                    repeat: true
+                    interval: 60 * 1000
+                    running: true
+
+                    onTriggered: updateDateTime()
+                }
+
+                Component.onCompleted: updateDateTime()
             }
 
             CustomButton {
@@ -142,6 +144,7 @@ Control {
                 opacity: 1.0
             }
         },
+
         State {
             name: "NONSLIDEON"
             when: !slideOn

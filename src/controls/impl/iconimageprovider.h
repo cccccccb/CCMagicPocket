@@ -23,7 +23,7 @@ public:
     ShadowImageProvider();
 
     static QUrl toMPShadowUrl(qreal shadowSize, qreal cornerHRadius, qreal cornerVRadius, qreal shadowRadius,
-                              const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY);
+                              const QColor &shadowColor, bool surround, qreal offsetX, qreal offsetY, bool inner);
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
 
 private:
