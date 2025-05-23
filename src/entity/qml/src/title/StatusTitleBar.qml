@@ -101,7 +101,7 @@ Control {
                     dayText.text = Qt.formatDateTime(date, "MMM-dd")
                     timeText.text = Qt.formatDateTime(date, "hh:mm")
 
-                    dateTimer.interval = 60 - date.getSeconds()
+                    dateTimer.interval = 1000 * (60 - date.getSeconds())
                     dateTimer.start()
                 }
 
@@ -177,7 +177,7 @@ Control {
                 }
 
                 PauseAnimation {
-                    duration: 100
+                    duration: 50
                 }
 
                 PropertyAnimation {
@@ -195,7 +195,7 @@ Control {
             ParallelAnimation {
                 PropertyAnimation {
                     target: root
-                    duration: 600
+                    duration: 400
                     properties: "opacity,y"
                     easing.type: Easing.InQuint
                 }
@@ -204,7 +204,7 @@ Control {
                     target: statusBlock
                     duration: 400
                     properties: "opacity"
-                    easing.type: Easing.InBack
+                    easing.type: Easing.InQuad
                 }
             }
         }

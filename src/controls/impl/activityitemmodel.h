@@ -3,6 +3,8 @@
 
 #include <QAbstractListModel>
 #include <QQmlComponent>
+#include <QPointer>
+#include <QQuickItem>
 
 class AppStartupModuleGroup;
 class ActivityItemModelElement;
@@ -39,7 +41,8 @@ public:
         IconPath,
         IsActivated,
         PreloadInformation,
-        EntityInformation
+        EntityInformation,
+        TemplateItem
     };
 
     bool contains(const QString &activityName) const;
@@ -47,6 +50,8 @@ public:
 
     void addItem(const QSharedPointer<ActivityItemModelElement> &element);
     void removeItem(const QString &activityName);
+
+    Q_INVOKABLE int indexOf(const QString &activityName) const;
 
 Q_SIGNALS:
     void countChanged();
@@ -57,8 +62,11 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     void setItemStatus(const QString &activityName, ActivityStatus status);
-    void activateItem(const QString &activityName);
+    void setItemTemplateItem(const QString &activityName, const QPointer<QQuickItem> &templateItem);
     void setLocalIconPath(const QString &activityName, const QUrl &localIconPath);
+
+    void activateItem(const QString &activityName);
+    void clearActivate();
 
     void setModule(const QString &activityName, const QSharedPointer<AppStartupModuleGroup> &module);
     QSharedPointer<AppStartupModuleGroup> module(const QString &activityName) const;
@@ -79,6 +87,7 @@ struct ActivityItemModelElement
     QString versionString;
     QUrl iconPath;
     bool isActivated;
+    QPointer<QQuickItem> templateItem;
 
     QSharedPointer<AppStartupModuleGroup> module;
 };

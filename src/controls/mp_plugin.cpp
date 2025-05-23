@@ -7,6 +7,10 @@
 #include "impl/activityitemmodel.h"
 #include "impl/activitymanager.h"
 #include "impl/modularlistmodel.h"
+#include "impl/planegroupmanager.h"
+#include "impl/activityplanegroup.h"
+#include "impl/activityplaneitem.h"
+#include "impl/activitytemplateitem.h"
 
 #include <qqml.h>
 #include <QDebug>
@@ -69,6 +73,10 @@ void MPControlExtension::registerTypes(const char *uri)
     qmlRegisterType<MouseTransparentItem>(uri, 1, 0, "MouseTransparentItem");
     qmlRegisterType<ActivityItemModel>(uri, 1, 0, "ActivityItemModel");
     qmlRegisterType<ModularListModel>(uri, 1, 0, "ModularListModel");
+    qmlRegisterType<ActivityPlaneGroup>(uri, 1, 0, "ActivityPlaneGroup");
+    qmlRegisterType<PlaneGroupManager>(uri, 1, 0, "PlaneGroupManager");
+    qmlRegisterType<ActivityPlaneItem>(uri, 1, 0, "ActivityPlaneItem");
+    qmlRegisterType<ActivityTemplateItem>(uri, 1, 0, "ActivityTemplateItem");
 
     QString qmlUriPrefix(QLatin1String("qrc:/") + QString(uri).replace(".", "/") + QLatin1String("/modules"));
 

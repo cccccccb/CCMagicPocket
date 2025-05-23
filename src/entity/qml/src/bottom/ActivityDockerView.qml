@@ -48,12 +48,18 @@ ListView {
 
         Connections {
             enabled: item.isRunningItem
-            target: item
+            target: MagicPocket.activityManager
 
-            function onIsCurrentItemChanged() {
-                if (isCurrentItem) {
+            function onCurrentActivityNameChanged() {
+                if (MagicPocket.activityManager.currentActivityName === activityName && activityName !== "") {
                     item.ListView.view.runningActivityItem = item
                 }
+            }
+        }
+
+        Component.onCompleted: {
+            if (item.isRunningItem && MagicPocket.activityManager.currentActivityName === activityName && activityName !== "") {
+                item.ListView.view.runningActivityItem = item
             }
         }
     }

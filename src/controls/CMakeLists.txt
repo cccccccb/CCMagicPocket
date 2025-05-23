@@ -18,6 +18,14 @@ set(DEPENDES_SOURCE
     impl/activitymoduleinformation.h
     impl/modularlistmodel.h
     impl/modularlistmodel.cpp
+    impl/activityplanegroup.h
+    impl/activityplanegroup.cpp
+    impl/planegroupmanager.h
+    impl/planegroupmanager.cpp
+    impl/activityplaneitem.h
+    impl/activityplaneitem.cpp
+    impl/activitytemplateitem.h
+    impl/activitytemplateitem.cpp
 
     mp_plugin.cpp
     mp_plugin.h

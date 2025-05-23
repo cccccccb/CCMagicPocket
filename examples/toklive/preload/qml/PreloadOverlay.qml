@@ -4,8 +4,6 @@ import QtQuick.Controls.Material
 
 Rectangle {
     color: "white"
-    border.color: "gray"
-    border.width: 1
     radius: 8
 
     Column {
@@ -55,14 +53,13 @@ Rectangle {
                 color: Qt.color("#A0E04F5F")
             }
 
-            BusyIndicator {
-                anchors.verticalCenter: parent.verticalCenter
-                Material.accent: Qt.color("#A0E04F5F")
-                running: true
-                width: 24
-                height: 24
-            }
-
+            // BusyIndicator {
+            //     anchors.verticalCenter: parent.verticalCenter
+            //     Material.accent: Qt.color("#A0E04F5F")
+            //     running: true
+            //     width: 24
+            //     height: 24
+            // }
         }
     }
 }

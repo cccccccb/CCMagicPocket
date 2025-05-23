@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import CCMagicPocket
+import CCMagicPocket.impl
+
 import CCStartup
 
 import "left"
@@ -15,54 +17,51 @@ AppStartupItem {
     asynchronous: true
 
     AppStartupComponent {
-        id: mainPaneComp
+        id: mainPlaneComp
 
-        MainPane {
-            id: mainPane
-            z: -100
+        MainDesktopPlane {
+            id: mainPlane
             anchors.fill: parent
             backgroundImagePath: Qt.url("../../res/default_wallpaper_2.jpg")
         }
     }
 
     AppStartupComponent {
-        id: centerPaneComponent
-        depends: mainPaneComp
+        id: layoutPlaneComponent
+        depends: mainPlaneComp
 
-        CenterPane {
-            parent: AppStartupItem.mainPane
+        LayoutPlane {
             anchors.fill: parent
+            parent: AppStartupItem.mainPlane
 
-            // Rectangle {
-            //     width: 600
-            //     height: 600
-            //     anchors.centerIn: parent
-
-            //     Rectangle {
-            //         width: 200
-            //         height: 200
-            //         color: "white"
-            //         radius: 8
-            //         anchors.centerIn: parent
-
-            //         OuterShadow {
-            //             anchors.fill: parent
-            //             shadowColor: Qt.rgba(0, 0, 0, 0.5)
-            //             cornerRadius: 8
-            //             shadowRadius: 20
-            //         }
-            //     }
-            // }
+            Component.onCompleted: {
+                AppStartupItem.mainPlane.layoutPlane = this
+            }
         }
     }
 
+    AppStartupComponent {
+        depends: layoutPlaneComponent
+
+        WindowPane {
+            anchors.fill: parent
+
+            Component.onCompleted: {
+                AppStartupItem.mainPlane.windowPlane = this
+                AppStartupItem.mainPlane.currentPlane = this
+            }
+        }
+    }
 
     AppStartupComponent {
-        depends: centerPaneComponent
+        depends: layoutPlaneComponent
 
-        NavigationBarGroup {
+        FullscreenPlane {
             anchors.fill: parent
-            blurBackground: AppStartupItem.mainPane
+
+            Component.onCompleted: {
+                AppStartupItem.mainPlane.fullscreenPlane = this
+            }
         }
     }
 

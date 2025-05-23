@@ -7,14 +7,13 @@ Item {
     ShaderEffect {
         id: effect
         property variant source
-        property variant noiseSrc: noiseImage
+        property variant noise: noiseImage
 
         property real time
-        property real maskTile: 0.3
-        property color edgeColor: Qt.rgba(1.0, 0.1, 0.0, 0.5)
+        property real crackCount: 30
 
         anchors.fill: parent
-        fragmentShader: "qrc:/CCMagicPocket/qml/src/shadereffects/burn.frag.qsb"
+        fragmentShader: "qrc:/CCMagicPocket/qml/src/shadereffects/glassbreak.frag.qsb"
     }
 
     Image {

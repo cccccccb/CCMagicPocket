@@ -10,7 +10,6 @@ Item {
     property bool slideOn: true
     property bool revertAnimation: false
     property bool isRunningItem: false
-    property bool isCurrentItem: isRunningItem ? (MagicPocket.activityManager.currentActivityName === activityName && activityName !== "") : false
     property alias hoverEnabled: _mouseArea.hoverEnabled
     property alias hovered: _mouseArea.containsMouse
 
@@ -141,11 +140,11 @@ Item {
 
             SequentialAnimation {
                 PauseAnimation {
-                    duration: revertAnimation ? (root.ListView.view.count - 1 - index) * 60 : index * 60
+                    duration: revertAnimation ? (root.ListView.view.count - 1 - index) * 30 : index * 30
                 }
 
                 PropertyAnimation {
-                    duration: 400
+                    duration: 250
                     properties: "_slideOnY"
                     easing.type: Easing.InQuint
                 }
@@ -160,7 +159,7 @@ Item {
     MouseArea {
         id: _mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        hoverEnabled: root.slideOn
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: (mouse) => {
             if (mouse.button === Qt.LeftButton)

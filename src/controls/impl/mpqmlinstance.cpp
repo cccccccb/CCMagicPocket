@@ -1,13 +1,14 @@
 #include "mpqmlinstance.h"
 #include "iconimageprovider.h"
 #include "activitymanager.h"
+#include "planegroupmanager.h"
 
 #include <QQuickWindow>
 #include <QtQml>
 
 MPQmlInstance::MPQmlInstance(QObject *parent)
     : QObject{parent}
-    , m_activityManager(nullptr)
+    , _planeGroupManager(new PlaneGroupManager(this))
 {}
 
 MPQmlInstance::~MPQmlInstance()
@@ -17,16 +18,21 @@ MPQmlInstance::~MPQmlInstance()
 
 ActivityManager *MPQmlInstance::activityManager() const
 {
-    return m_activityManager;
+    return _activityManager;
 }
 
 void MPQmlInstance::setActivityManager(ActivityManager *activityManager)
 {
-    if (m_activityManager == activityManager)
+    if (_activityManager == activityManager)
         return;
 
-    m_activityManager = activityManager;
+    _activityManager = activityManager;
     Q_EMIT activityManagerChanged();
+}
+
+PlaneGroupManager *MPQmlInstance::planeGroupManager() const
+{
+    return _planeGroupManager;
 }
 
 QUrl MPQmlInstance::toMPIconUrl(const QString &name, const QColor &color, bool hovered, bool pressed)

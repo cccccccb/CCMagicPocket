@@ -49,16 +49,16 @@ set(qml_activity_file
     "qml/src/activity/ActivityContainer.qml"
     "qml/src/activity/ActivityLayoutView.qml"
     "qml/src/activity/ActivityLayoutDelegate.qml"
-    "qml/src/activity/ShowHideTransition.qml"
-    "qml/src/activity/CloseTransition.qml"
     "qml/src/activity/MotionBehavior.qml"
+    "qml/src/activity/LayoutTransition.qml"
 )
 
 set(qml_pane_files
-    "qml/src/NavigationBarGroup.qml"
-    "qml/src/MainPane.qml"
+    "qml/src/LayoutPlane.qml"
+    "qml/src/MainDesktopPlane.qml"
     "qml/src/MainWindow.qml"
-    "qml/src/CenterPane.qml"
+    "qml/src/WindowPane.qml"
+    "qml/src/FullscreenPlane.qml"
 )
 
 set(qml_shaders_files
@@ -68,12 +68,15 @@ set(qml_shaders_files
     "qml/src/shadereffects/genie.vert.qsb"
     "qml/src/shadereffects/burn.frag"
     "qml/src/shadereffects/burn.frag.qsb"
+    "qml/src/shadereffects/glassbreak.frag"
+    "qml/src/shadereffects/glassbreak.frag.qsb"
 )
 
 set(qml_effects_files
     "qml/src/effects/BurnOutEffect.qml"
     "qml/src/effects/MagicInEffect.qml"
     "qml/src/effects/InvertColorEffect.qml"
+    "qml/src/effects/GlassBreak.qml"
 )
 
 set(qml_resource_files

@@ -1,34 +1,52 @@
 import QtQuick
 
 import CCMagicPocket
+import CCMagicPocket.impl
 
 import "left"
 import "title"
 import "bottom"
 
-Rectangle {
+ActivityPlaneItem {
     id: navigationRoot
-    radius: 8
-
-    property Item blurBackground
-
-    clip: true
-    color: "transparent"
+    property bool _slideOn: true
 
     StatusTitleBar {
         id: statusBar
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 60
-        slideOn: root.populate /*&& !leftControlBar.visible*/ && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
-        blurBackground: navigationRoot.blurBackground
+        slideOn: populate /*&& !leftControlBar.visible*/ && navigationRoot._slideOn
+        blurBackground: navigationRoot.group
     }
 
     ActivityDocker {
         id: activityDocker
 
         anchors.horizontalCenter: parent.horizontalCenter
-        slideOn: root.populate /*&& !leftControlBar.visible*/ && !MagicPocket.activityManager.runningContainer.visible && !MagicPocket.activityManager.runningLayoutView.visible
-        blurBackground: navigationRoot.blurBackground
+        slideOn: statusBar.slideOn
+        blurBackground: navigationRoot.group
+    }
+
+    pushUp: Transition {
+        PropertyAction {
+            target: navigationRoot
+            properties: "_slideOn"
+            value: true
+        }
+    }
+
+    popUp: Transition {
+        SequentialAnimation {
+            PropertyAction {
+                target: navigationRoot
+                properties: "_slideOn"
+                value: false
+            }
+
+            PauseAnimation {
+                duration: 400
+            }
+        }
     }
 
     // NavigationPopup {

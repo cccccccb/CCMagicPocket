@@ -3,6 +3,7 @@ import QtQuick.Effects
 import QtQuick.Layouts
 
 import CCMagicPocket
+import CCMagicPocket.impl
 
 Item {
     id: root
@@ -26,7 +27,7 @@ Item {
         id: contentLoader
         property real contentYTranslate: 0.0
 
-        active: index > 1 && MagicPocket.activityManager.runningLayoutView.visible
+        active: index > 1
         width: root.ListView.view.width * 0.8
         height: root.ListView.view.height * 0.8
         anchors.left: parent.left
@@ -37,12 +38,11 @@ Item {
             target: contentLoader
             properties: "contentYTranslate"
             easing.type: Easing.OutBack
-            duration: 600
+            duration: 500
         }
 
         sourceComponent: Item {
             id: contentItem
-            readonly property Item visibleItem: MagicPocket.activityManager.runningItemAt(activityName)
             readonly property real scaleFactor: 0.85 + root.motionFactor * 0.025
 
             scale: (pressAndHold ? 1.05 : 1) * (scaleFactor > 1.0 ? 1.0 : scaleFactor)
@@ -54,9 +54,9 @@ Item {
 
             RowLayout {
                 id: acIdLayout
-                anchors.bottom: sourceEffect.top
+                anchors.bottom: _container.top
                 anchors.bottomMargin: 10
-                anchors.left: sourceEffect.left
+                anchors.left: _container.left
                 anchors.leftMargin: 20
                 spacing: 6
 
@@ -85,30 +85,36 @@ Item {
                 }
             }
 
-            Rectangle {
-                id: sourceEffect
+            Item {
+                id: _container
                 anchors.fill: parent
-
-                color: "white"
-                radius: 12
-                visible: false
-
-                Loader {
-                    anchors.fill: parent
-                    active: visibleItem !== null
-
-                    sourceComponent: ShaderEffectSource {
-                        sourceItem: visibleItem
-                        hideSource: true
-                        live: false
-                    }
-                }
 
                 OuterShadow {
                     shadowColor: Qt.color("#40000000")
                     shadowRadius: 20
-                    anchors.fill: sourceEffect
-                    cornerRadius: sourceEffect.radius
+                    anchors.fill: parent
+                    cornerRadius: 12
+                }
+
+                Loader {
+                    active: templateItem !== null
+                    anchors.fill: parent
+
+                    sourceComponent: ShaderEffectSource {
+                        hideSource: true
+                        live: false
+                        sourceItem: templateItem
+                    }
+                }
+
+                Loader {
+                    active: templateItem === null
+                    anchors.fill: parent
+
+                    sourceComponent: Rectangle {
+                        color: "white"
+                        radius: 12
+                    }
                 }
             }
         }
@@ -147,11 +153,10 @@ Item {
                 root.ListView.view.interactiveMovingIndex = index
 
             var yMovedStep = this.point.position.y - this.lastPosY
-
-            if (yMovedStep > 0)
-                contentLoader.contentYTranslate += 0.4 * yMovedStep
-            else
+            if (yMovedStep < 0 || contentLoader.contentYTranslate < 0)
                 contentLoader.contentYTranslate += yMovedStep
+            else
+                contentLoader.contentYTranslate += 0.4 * yMovedStep
 
             this.lastPosY = this.point.position.y
         }
@@ -159,7 +164,14 @@ Item {
         onActiveChanged: {
             if (!this.active) {
                 this.lastPosY = 0.0
-                contentYMotionAnimation.to = 0.0
+
+                if (Math.abs(contentLoader.contentYTranslate) > (contentLoader.height / 2)) {
+                    contentYMotionAnimation.to = -(root.height + contentLoader.height) / 2
+                    MagicPocket.activityManager.close(activityName)
+                } else {
+                    contentYMotionAnimation.to = 0.0
+                }
+
                 contentYMotionAnimation.start()
                 this.direction = -1
                 root.ListView.view.interactiveMovingIndex = -1

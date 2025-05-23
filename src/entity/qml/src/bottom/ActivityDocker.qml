@@ -78,7 +78,7 @@ Control {
             model: MagicPocket.activityManager.installModel
 
             Component.onCompleted: {
-                MagicPocket.activityManager.install("C:/workspace/project/CCMagicPocket/build/Desktop_Qt_6_8_2_MinGW_64_bit-Debug/mpk/CCMagicPocketExample.mpk")
+                MagicPocket.activityManager.install("D:/station/workspace/project/CCMagicPocket/build/Desktop_Qt_6_8_3_MinGW_64_bit-Debug/mpk/CCMagicPocketExample.mpk")
             }
         }
 
@@ -149,9 +149,9 @@ Control {
 
             PropertyAnimation {
                 target: root
-                duration: 600
+                duration: 400
                 properties: "opacity,y"
-                easing.type: Easing.InQuint
+                easing.type: Easing.InQuad
             }
         }
     ]

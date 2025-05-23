@@ -50,7 +50,7 @@ function(_mp_internal_create_target ACTIVITY_NAME)
     add_custom_command(
         OUTPUT ${tmp_build_source_path}/Activity.json
         COMMAND ${CMAKE_COMMAND} -E rm -rf ${output_target_file_path}
-        COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/temp
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${tmp_build_source_path}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_build_source_path}
         COMMAND ${CMAKE_COMMAND} -E copy ${arg_ICON_PATH} ${tmp_build_source_path}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_build_source_path}/preload
@@ -70,6 +70,7 @@ function(_mp_internal_create_target ACTIVITY_NAME)
     get_filename_component(ICON_FILE_NAME ${arg_ICON_PATH} NAME)
     add_custom_command(
         OUTPUT ${output_target_file_path}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${arg_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${output_target_file_path} --format=zip
                 ${tmp_build_source_path}/preload ${tmp_build_source_path}/entity
                 ${tmp_build_source_path}/Activity.json
@@ -77,6 +78,7 @@ function(_mp_internal_create_target ACTIVITY_NAME)
         WORKING_DIRECTORY ${tmp_build_source_path}/
         DEPENDS ${ACTIVITY_NAME}_copy_configure
         COMMENT "Packaging dynamic libraries and their dependencies into ${output_target_file_path}"
+        USES_TERMINAL
     )
 
     add_custom_target(

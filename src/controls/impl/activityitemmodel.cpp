@@ -4,10 +4,10 @@
 ActivityItemModel::ActivityItemModel(QObject *parent)
     : QAbstractListModel{parent}
 {
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Firefox", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/firefox.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Twitter", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/twitter.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Google Chrome", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/google-chrome.svg"), false}));
-    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"", "Wechat", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("C:/workspace/project/CCMagicPocket/src/entity/res/svg/wechat.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"Firefox", "Firefox", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("D:/station/workspace/project/CCMagicPocket/src/entity/res/svg/firefox.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"Twitter", "Twitter", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("D:/station/workspace/project/CCMagicPocket/src/entity/res/svg/twitter.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"Google Chrome", "Google Chrome", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("D:/station/workspace/project/CCMagicPocket/src/entity/res/svg/google-chrome.svg"), false}));
+    addItem(QSharedPointer<ActivityItemModelElement>::create(ActivityItemModelElement{"Wechat", "Wechat", ActivityItemModel::Installed, "0.0.1", QUrl::fromLocalFile("D:/station/workspace/project/CCMagicPocket/src/entity/res/svg/wechat.svg"), false}));
 }
 
 ActivityItemModel::~ActivityItemModel()
@@ -46,7 +46,8 @@ QSharedPointer<ActivityItemModelElement> ActivityItemModel::element(const QShare
 {
     auto it = std::find_if(_datas.begin(), _datas.end(),
                            [module](const QSharedPointer<ActivityItemModelElement> &element) {
-                               return element->module == module;
+                               return element->module && element->module->preload() == module->preload()
+                                        && element->module->entity() == module->entity();
                            });
 
     if (it == _datas.end())
@@ -58,7 +59,7 @@ QSharedPointer<ActivityItemModelElement> ActivityItemModel::element(const QShare
 void ActivityItemModel::addItem(const QSharedPointer<ActivityItemModelElement> &element)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    _datas << element;
+    _datas.prepend(element);
     endInsertRows();
 }
 
@@ -73,6 +74,17 @@ void ActivityItemModel::removeItem(const QString &activityName)
         return;
 
     removeItem(*it);
+}
+
+int ActivityItemModel::indexOf(const QString &activityName) const
+{
+    int indexOf = -1;
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+        indexOf++;
+        return element->activityName == activityName;
+    });
+
+    return indexOf;
 }
 
 void ActivityItemModel::removeItem(const QSharedPointer<ActivityItemModelElement> &element)
@@ -124,6 +136,9 @@ QVariant ActivityItemModel::data(const QModelIndex &index, int role) const
     case ActivityItemModel::EntityInformation: {
         return QVariant::fromValue(element->module ? element->module->entity() : AppStartupModuleInformation());
     }
+    case ActivityItemModel::TemplateItem: {
+        return QVariant::fromValue(element->templateItem.data());
+    }
         break;
     default:
         break;
@@ -143,6 +158,7 @@ QHash<int, QByteArray> ActivityItemModel::roleNames() const
         { IsActivated, "isActivated" },
         { PreloadInformation, "preload" },
         { EntityInformation, "entity" },
+        { TemplateItem, "templateItem" },
     };
 
     return roles;
@@ -161,6 +177,21 @@ void ActivityItemModel::setItemStatus(const QString &activityName, ActivityStatu
 
     (*it)->status = status;
     Q_EMIT dataChanged(index(indexOf, 0), index(indexOf, 0), {ActivityRoles::ItemStatus});
+}
+
+void ActivityItemModel::setItemTemplateItem(const QString &activityName, const QPointer<QQuickItem> &templateItem)
+{
+    int indexOf = -1;
+    auto it = std::find_if(_datas.cbegin(), _datas.cend(), [activityName, &indexOf](const QSharedPointer<ActivityItemModelElement> &element) {
+        indexOf++;
+        return element->activityName == activityName;
+    });
+
+    if (indexOf == -1 || it == _datas.cend())
+        return;
+
+    (*it)->templateItem = templateItem;
+    Q_EMIT dataChanged(index(indexOf, 0), index(indexOf, 0), {ActivityRoles::TemplateItem});
 }
 
 void ActivityItemModel::activateItem(const QString &activityName)
@@ -185,6 +216,17 @@ void ActivityItemModel::activateItem(const QString &activityName)
     _activatedElement = (*it);
 
     Q_EMIT dataChanged(index(indexOf, 0), index(indexOf, 0), {ActivityRoles::IsActivated});
+}
+
+void ActivityItemModel::clearActivate()
+{
+    if (_activatedElement == nullptr)
+        return;
+
+    _activatedElement->isActivated = false;
+    int activatedIndex = _datas.indexOf(_activatedElement);
+    Q_EMIT dataChanged(index(activatedIndex, 0), index(activatedIndex, 0), {ActivityRoles::IsActivated});
+    _activatedElement.clear();
 }
 
 void ActivityItemModel::setLocalIconPath(const QString &activityName, const QUrl &localIconPath)
